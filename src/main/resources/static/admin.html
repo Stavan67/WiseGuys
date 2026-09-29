@@ -1,0 +1,3425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseGuy's - Order Admin</title>
+    <style>
+        :root {
+            --maroon: #3B1410;
+            --maroon-dark: #2A0D0A;
+            --cream: #EDE7DA;
+            --gold: #C9A96A;
+            --text-dark: #2A1F1A;
+            --green: #2e7d32;
+            --red: #c62828;
+            --blue: #1565c0;
+            --orange: #ef6c00;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--cream);
+            color: var(--text-dark);
+            padding-bottom: 30px;
+        }
+
+        header {
+            background: var(--maroon);
+            color: var(--cream);
+            padding: 6px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            position: relative;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-logo {
+            display: block;
+            max-width: 400px;
+            max-height: 160px;
+            width: auto;
+            height: auto;
+            margin: 0 auto;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .header-right {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+        }
+
+        .logout-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: var(--cream);
+            border: 1px solid rgba(237,231,218,0.4);
+        }
+
+        .logout-link svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .logout-link:active {
+            background: rgba(237,231,218,0.15);
+        }
+
+        #refresh-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--gold);
+            display: inline-block;
+        }
+
+        .tab-btn {
+            background: white;
+            border: 1.5px solid rgba(59,20,16,0.2);
+            color: var(--maroon);
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 18px;
+            cursor: pointer;
+        }
+
+        .tab-btn.active {
+            background: var(--maroon);
+            color: var(--cream);
+            border-color: var(--maroon);
+        }
+
+        .tabs-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 14px 16px 0;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-icon-btn {
+            position: relative;
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: white;
+            border: 1.5px solid rgba(59,20,16,0.2);
+            color: var(--maroon);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .filter-icon-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .filter-dot {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--red);
+        }
+
+        .filter-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .filter-overlay.visible {
+            display: flex;
+        }
+
+        .filter-sheet {
+            background: var(--cream);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 18px 18px 0 0;
+            padding: 20px;
+            animation: slide-up 0.2s ease-out;
+        }
+
+        @keyframes slide-up {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .filter-sheet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: bold;
+            color: var(--maroon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 15px;
+            border-bottom: 2px solid var(--maroon);
+            padding-bottom: 8px;
+        }
+
+        .filter-close {
+            background: none;
+            border: none;
+            font-size: 22px;
+            color: var(--maroon);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .filter-sheet .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .filter-sheet label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--maroon);
+            margin-bottom: 5px;
+        }
+
+        .filter-sheet input {
+            width: 100%;
+            padding: 11px 12px;
+            border: 1.5px solid rgba(59,20,16,0.3);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .filter-apply-btn {
+            width: 100%;
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 6px;
+            font-family: inherit;
+        }
+
+        .filter-clear-btn {
+            width: 100%;
+            background: none;
+            color: var(--maroon);
+            border: 1.5px solid var(--maroon);
+            padding: 11px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+
+        .search-bar input {
+            flex: 1;
+            min-width: 140px;
+            padding: 9px 12px;
+            border: 1.5px solid rgba(59,20,16,0.25);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .search-bar button {
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .search-bar button.clear-btn {
+            background: white;
+            color: var(--maroon);
+            border: 1.5px solid var(--maroon);
+        }
+
+        .pagination button {
+            background: white;
+            border: 1.5px solid rgba(59,20,16,0.25);
+            color: var(--maroon);
+            font-weight: bold;
+            font-size: 13px;
+            padding: 8px 16px;
+            border-radius: 18px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .date-field-wrapper {
+            position: relative;
+        }
+
+        .date-placeholder {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 15px;
+            color: #9a8f84;
+            pointer-events: none;
+        }
+
+        #filter-date::-webkit-datetime-edit {
+            color: transparent;
+        }
+
+        #filter-date.has-value::-webkit-datetime-edit {
+            color: var(--text-dark);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination span {
+            font-size: 13px;
+            color: #5c4a3f;
+        }
+
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px 16px 80px;
+        }
+
+        .bottom-status-bar {
+            position: fixed;
+            left: 50%;
+            bottom: 14px;
+            transform: translateX(-50%);
+            background: var(--maroon);
+            color: var(--cream);
+            padding: 8px 14px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(42,13,10,0.4);
+            z-index: 40;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-divider {
+            color: rgba(237,231,218,0.4);
+        }
+
+        .pagination-controls {
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pagination-controls.visible {
+            display: flex;
+        }
+
+        .pagination-controls button {
+            background: var(--gold);
+            color: var(--maroon-dark);
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-controls button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .pagination-bar.visible {
+            display: flex;
+        }
+
+        .pagination-bar button {
+            background: var(--gold);
+            color: var(--maroon-dark);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-bar button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #7a6a5d;
+            padding: 60px 20px;
+            font-style: italic;
+        }
+
+        .order-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(42,13,10,0.08);
+            border-left: 6px solid var(--gold);
+        }
+
+        .table-group {
+            margin-bottom: 16px;
+            border-radius: 10px;
+            background: rgba(59,20,16,0.03);
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(59,20,16,0.08);
+        }
+
+        .table-group-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 16px;
+            background: var(--maroon);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .table-group-header:hover {
+            background: var(--maroon-dark);
+        }
+
+        .table-group-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+            flex: 1 1 auto;
+            overflow: hidden;
+        }
+
+        .table-group-title {
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            color: var(--gold);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;      /* NEW: never sacrifice the table name first */
+        }
+
+        .table-group-count {
+            font-size: 12px;
+            color: rgba(237,231,218,0.75);
+            white-space: nowrap;
+            padding-left: 10px;
+            border-left: 1px solid rgba(237,231,218,0.3);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
+        }
+
+        @media (max-width: 480px) {
+            .table-group-count {
+                display: none;   /* hide "X order(s) • ₹Y" on very small screens, keep full table name */
+            }
+        }
+
+        .table-group-toggle-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: rgba(237,231,218,0.15);
+            color: var(--gold);
+            font-size: 10px;
+            flex-shrink: 0;
+            transition: transform 0.25s ease, background 0.2s ease;
+        }
+
+        .table-group-header:hover .table-group-toggle-icon {
+            background: rgba(237,231,218,0.25);
+        }
+
+        .table-group.collapsed .table-group-toggle-icon {
+            transform: rotate(-90deg);
+        }
+
+        .table-group-body {
+            padding: 12px;
+            background: #fff;
+        }
+
+        .table-group.collapsed .table-group-body {
+            display: none;
+        }
+
+        .close-table-btn {
+            border: none;
+            background: var(--gold);
+            color: var(--maroon-dark);
+            font-weight: 700;
+            font-size: 12px;
+            font-family: inherit;
+            padding: 7px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .close-table-btn:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .close-table-btn:active {
+            transform: scale(0.96);
+        }
+
+        .close-table-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .order-card.status-PLACED { border-left-color: var(--gold); }
+        .order-card.status-ACCEPTED { border-left-color: var(--blue); }
+        .order-card.status-PREPARING { border-left-color: var(--orange); }
+        .order-card.status-READY { border-left-color: var(--green); }
+        .order-card.status-SERVED { border-left-color: #999; opacity: 0.75; }
+        .order-card.status-CANCELLED { border-left-color: var(--red); opacity: 0.65; }
+
+        .order-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+        }
+
+        .order-table-badge {
+            background: var(--maroon);
+            color: var(--gold);
+            font-weight: bold;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 14px;
+            display: inline-block;
+        }
+
+        .order-customer {
+            font-weight: bold;
+            font-size: 16px;
+            margin-top: 6px;
+        }
+
+        .order-meta {
+            font-size: 12px;
+            color: #7a6a5d;
+            margin-top: 3px;
+        }
+
+        .order-right {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .order-total {
+            font-weight: bold;
+            font-size: 17px;
+            color: var(--maroon);
+        }
+
+        .order-status-pill {
+            display: inline-block;
+            margin-top: 6px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 12px;
+            color: white;
+        }
+
+        .status-PLACED .order-status-pill { background: var(--gold); color: var(--maroon-dark); }
+        .status-ACCEPTED .order-status-pill { background: var(--blue); }
+        .status-PREPARING .order-status-pill { background: var(--orange); }
+        .status-READY .order-status-pill { background: var(--green); }
+        .status-SERVED .order-status-pill { background: #999; }
+        .status-CANCELLED .order-status-pill { background: var(--red); }
+
+        .order-details {
+            display: none;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(59,20,16,0.1);
+        }
+
+        .order-details.open { display: block; }
+
+        .detail-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            padding: 6px 0;
+            border-bottom: 1px dashed rgba(59,20,16,0.1);
+        }
+
+        .detail-line-name { font-weight: bold; }
+        .detail-line-sub { font-size: 11.5px; color: #7a6a5d; margin-top: 2px; }
+
+        .tax-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #5c4a3f;
+            padding: 4px 0;
+        }
+
+        .tax-line.total {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--maroon);
+            padding-top: 8px;
+            border-top: 1px solid rgba(59,20,16,0.15);
+            margin-top: 4px;
+        }
+
+        .phone-link {
+            color: var(--maroon);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 14px;
+        }
+
+        .action-btn {
+            flex: 1;
+            min-width: 110px;
+            border: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            font-family: inherit;
+            cursor: pointer;
+            color: white;
+        }
+
+        .action-btn.accept { background: var(--blue); }
+        .action-btn.preparing { background: var(--orange); }
+        .action-btn.ready { background: var(--green); }
+        .action-btn.served { background: #555; }
+        .action-btn.cancel { background: var(--red); }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        #filter-date::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .date-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 18px;
+            height: 18px;
+            fill: var(--maroon);
+            pointer-events: none;
+        }
+
+        .error-banner {
+            background: #ffe0e0;
+            color: var(--red);
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin: 0 16px 10px;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
+            display: none;
+        }
+
+        .error-banner.visible { display: block; }
+
+        /* --- Sidebar --- */
+        .menu-toggle-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            color: var(--cream);
+            border: 1px solid rgba(237,231,218,0.4);
+            background: none;
+            cursor: pointer;
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .menu-toggle-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+        }
+
+        .menu-toggle-btn:active {
+            background: rgba(237,231,218,0.15);
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+        }
+
+        .sidebar-overlay.visible {
+            display: block;
+        }
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 240px;
+            max-width: 80vw;
+            background: var(--maroon);
+            color: var(--cream);
+            z-index: 201;
+            transform: translateX(-100%);
+            transition: transform 0.22s ease-out;
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+        }
+
+        .sidebar.visible {
+            transform: translateX(0);
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 18px 16px;
+            border-bottom: 1px solid rgba(237,231,218,0.2);
+            margin-bottom: 8px;
+        }
+
+        .sidebar-title {
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 14px;
+            color: var(--gold);
+        }
+
+        .sidebar-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--cream);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 13px 18px;
+            color: var(--cream);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: inherit;
+        }
+
+        .sidebar-link svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link.active {
+            background: rgba(237,231,218,0.12);
+            color: var(--gold);
+        }
+
+        .sidebar-link:active {
+            background: rgba(237,231,218,0.08);
+        }
+
+        /* --- Menu Items admin screen --- */
+        .view-screen { display: none; }
+        .view-screen.active { display: block; }
+
+        .menu-admin-category {
+            margin-bottom: 24px;
+        }
+
+        .menu-admin-category h2 {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--maroon);
+            border-bottom: 2px solid var(--maroon);
+            padding-bottom: 6px;
+            margin: 0 0 10px;
+        }
+
+        .menu-admin-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 4px;
+            border-bottom: 1px solid rgba(59, 20, 16, 0.12);
+        }
+
+        .menu-admin-item-image {
+            width: 44px;
+            height: 44px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #ddd4c0, #cfc3a8);
+            flex-shrink: 0;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--maroon);
+        }
+
+        .menu-admin-item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .menu-admin-item-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .menu-admin-item-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .menu-admin-item-price {
+            font-size: 12px;
+            color: #5c4a3f;
+        }
+
+        .availability-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .availability-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-width: 92px;
+            text-align: right;
+        }
+
+        .availability-label.available { color: var(--green); }
+        .availability-label.unavailable { color: var(--red); }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 42px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #c9beac;
+            border-radius: 24px;
+            transition: 0.15s;
+        }
+
+        .switch-slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: 0.15s;
+        }
+
+        .switch input:checked + .switch-slider {
+            background-color: var(--green);
+        }
+
+        .switch input:checked + .switch-slider:before {
+            transform: translateX(18px);
+        }
+
+        .switch input:disabled + .switch-slider {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .addon-list-section {
+            margin-bottom: 24px;
+        }
+
+        .addon-list-section h2 {
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--maroon);
+            border-bottom: 2px solid var(--maroon);
+            padding-bottom: 6px;
+            margin: 0 0 10px;
+        }
+
+        .addon-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 4px;
+            border-bottom: 1px solid rgba(59, 20, 16, 0.12);
+        }
+
+        .addon-row-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .addon-row-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .addon-row-price {
+            font-size: 12px;
+            color: #5c4a3f;
+        }
+
+        .add-addon-form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .add-addon-form input {
+            padding: 8px 10px;
+            border: 1.5px solid rgba(59, 20, 16, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .add-addon-form input[name="addon-name"] { flex: 2; min-width: 140px; }
+        .add-addon-form input[name="addon-price"] { flex: 1; min-width: 80px; }
+
+        .add-addon-btn {
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .assign-item-row {
+            padding: 10px 4px;
+            border-bottom: 1px solid rgba(59, 20, 16, 0.12);
+        }
+
+        .assign-item-name {
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .assign-addon-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .addon-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1.5px solid rgba(59, 20, 16, 0.3);
+            border-radius: 14px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .addon-chip.selected {
+            background: var(--maroon);
+            color: var(--cream);
+            border-color: var(--maroon);
+        }
+
+        .addon-chip input {
+            display: none;
+        }
+
+        .section-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .section-tab-btn {
+            background: white;
+            border: 1.5px solid rgba(59,20,16,0.2);
+            color: var(--maroon);
+            font-family: inherit;
+            font-weight: bold;
+            font-size: 12px;
+            padding: 7px 14px;
+            border-radius: 16px;
+            cursor: pointer;
+        }
+
+        .section-tab-btn.active {
+            background: var(--maroon);
+            color: var(--cream);
+        }
+
+        .menu-admin-toolbar {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 14px;
+        }
+
+        .add-item-btn {
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 9px 18px;
+            border-radius: 18px;
+            font-weight: bold;
+            font-size: 13px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .item-edit-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .menu-admin-item-actions {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .menu-admin-item-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .item-edit-btn, .item-delete-btn {
+            border: 1.5px solid rgba(59, 20, 16, 0.3);
+            background: white;
+            color: var(--maroon);
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .item-edit-btn svg, .item-delete-btn svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .item-delete-btn {
+            color: var(--red);
+            border-color: rgba(198, 40, 40, 0.4);
+        }
+
+        .item-delete-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .enable-toggle-row, .daily-toggle-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .item-form-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .item-form-overlay.visible {
+            display: flex;
+        }
+
+        .item-form-sheet {
+            background: var(--cream);
+            width: 100%;
+            max-width: 480px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 18px 18px 0 0;
+            padding: 20px;
+            animation: slide-up 0.2s ease-out;
+        }
+
+        .item-form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            font-weight: bold;
+            color: var(--maroon);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 15px;
+            border-bottom: 2px solid var(--maroon);
+            padding-bottom: 8px;
+        }
+
+        .item-form-group {
+            margin-bottom: 14px;
+        }
+
+        .item-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--maroon);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .item-form-group input[type="text"],
+        .item-form-group input[type="number"],
+        .item-form-group textarea,
+        .item-form-group select {
+            width: 100%;
+            padding: 9px 10px;
+            border: 1.5px solid rgba(59, 20, 16, 0.3);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            background: white;
+            color: var(--text-dark);
+        }
+
+        .item-form-group textarea {
+            resize: vertical;
+            min-height: 60px;
+        }
+
+        .item-form-checkbox-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .item-form-checkbox-row label {
+            font-size: 13px;
+            font-weight: normal;
+            text-transform: none;
+            letter-spacing: normal;
+            margin: 0;
+        }
+
+        .item-form-error {
+            display: none;
+            color: var(--red);
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .item-form-error.visible {
+            display: block;
+        }
+
+        .item-form-submit-btn {
+            width: 100%;
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 14px;
+            cursor: pointer;
+            font-family: inherit;
+            margin-top: 6px;
+        }
+
+        .item-form-submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div id="toast-container" style="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;"></div>
+<header>
+    <button type="button" class="menu-toggle-btn" id="sidebar-toggle-btn" aria-label="Menu">
+        <svg viewBox="0 0 24 24"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <div class="header-left">
+        <img src="/images/logo.png" alt="WiseGuy's" class="admin-logo" />
+    </div>
+    <div class="header-right">
+        <a href="/logout" class="logout-link" title="Logout" aria-label="Logout">
+            <svg viewBox="0 0 24 24"><path d="M16 13v-2H7V8l-5 4 5 4v-3h9zM20 3h-8v2h8v14h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        </a>
+    </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+        <span class="sidebar-title">Menu</span>
+        <button type="button" class="sidebar-close" id="sidebar-close-btn" aria-label="Close">&times;</button>
+    </div>
+    <button type="button" class="sidebar-link active" data-view="dashboard">
+        <svg viewBox="0 0 24 24"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        Dashboard
+    </button>
+    <button type="button" class="sidebar-link" data-view="menu-items">
+        <svg viewBox="0 0 24 24"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+        Menu Items
+    </button>
+    <button type="button" class="sidebar-link" data-view="manage-addons">
+        <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4H4V6h16v2z"/><path d="M6 14h5v2H6z"/></svg>
+        Manage Addons
+    </button>
+    <button type="button" class="sidebar-link" data-view="manage-categories">
+        <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+        Manage Categories
+    </button>
+    <button type="button" class="sidebar-link" data-view="manage-tables">
+        <svg viewBox="0 0 24 24"><path d="M4 4h6v6H4V4zm2 2v2h2V6H6zm8-2h6v6h-6V4zm2 2v2h2V6h-2zM4 14h6v6H4v-6zm2 2v2h2v-2H6zm10-2h2v2h2v-2h2v6h-6v-2h2v-2h-2v-2z"/></svg>
+        QR Codes
+    </button>
+</div>
+
+<div class="error-banner" id="error-banner"></div>
+
+<div class="view-screen active" id="view-dashboard">
+
+    <div class="tabs-row">
+        <div class="tabs">
+            <button class="tab-btn active" data-filter="NEW">New</button>
+            <button class="tab-btn" data-filter="ACCEPTED">Active</button>
+            <button class="tab-btn" data-filter="SERVED">Served</button>
+            <button class="tab-btn" data-filter="CANCELLED">Cancelled</button>
+        </div>
+        <button type="button" class="filter-icon-btn" id="filter-icon-btn" aria-label="Search and filter">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 5L20.5 19l-5-5zm-6 0A4.5 4.5 0 1 1 14 9.5 4.5 4.5 0 0 1 9.5 14z"/></svg>
+            <span class="filter-dot" id="filter-dot" style="display:none;"></span>
+        </button>
+    </div>
+
+    <div class="filter-overlay" id="filter-overlay">
+        <div class="filter-sheet">
+            <div class="filter-sheet-header">
+                <span>Search &amp; Filter</span>
+                <button type="button" class="filter-close" id="filter-close-btn">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="filter-table">Table Number</label>
+                <input type="text" id="filter-table" placeholder="e.g. 4" />
+            </div>
+            <div class="form-group">
+                <label for="filter-name">Customer Name</label>
+                <input type="text" id="filter-name" placeholder="e.g. Rahul" />
+            </div>
+            <div class="form-group">
+                <label for="filter-date">Date</label>
+                <div class="date-field-wrapper">
+                    <input type="date" id="filter-date" />
+                    <span class="date-placeholder" id="date-placeholder">dd-mm-yyyy</span>
+                    <svg class="date-icon" viewBox="0 0 24 24"><path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM5 8V6h14v2H5z"/></svg>
+                </div>
+            </div>
+            <button type="button" class="filter-apply-btn" id="apply-filter-btn">Apply Filters</button>
+            <button type="button" class="filter-clear-btn" id="clear-filter-btn">Clear Filters</button>
+        </div>
+    </div>
+
+    <div class="content" id="orders-container">
+        <div class="empty-state">Loading orders...</div>
+    </div>
+
+    <div class="bottom-status-bar" id="bottom-status-bar">
+        <span id="refresh-indicator"></span>
+        <span id="last-updated">Loading...</span>
+        <span class="status-divider" id="status-divider" style="display:none;">|</span>
+        <div class="pagination-controls" id="pagination-controls">
+            <button type="button" id="prev-page-btn" aria-label="Previous page">&lsaquo;</button>
+            <span id="page-info">1/1</span>
+            <button type="button" id="next-page-btn" aria-label="Next page">&rsaquo;</button>
+        </div>
+    </div>
+
+</div><!-- /view-dashboard -->
+
+<div class="view-screen" id="view-menu-items">
+    <div class="content">
+        <div class="menu-admin-toolbar">
+            <button type="button" class="add-item-btn" id="add-item-btn">+ Add Item</button>
+        </div>
+        <div id="menu-items-container">
+            <div class="empty-state">Loading menu items...</div>
+        </div>
+    </div>
+</div>
+<div class="view-screen" id="view-manage-addons">
+    <div class="content" id="manage-addons-container">
+        <div class="empty-state">Loading addons...</div>
+    </div>
+</div>
+<div class="view-screen" id="view-manage-categories">
+    <div class="content" id="manage-categories-container">
+        <div class="empty-state">Loading categories...</div>
+    </div>
+</div>
+<div class="view-screen" id="view-manage-tables">
+    <div class="content" id="manage-tables-container">
+        <div class="empty-state">Loading tables...</div>
+    </div>
+</div>
+<div class="item-form-overlay" id="item-form-overlay">
+    <div class="item-form-sheet">
+        <div class="item-form-header">
+            <span id="item-form-title">Add Item</span>
+            <button type="button" class="filter-close" id="item-form-close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="item-form-error" id="item-form-error"></div>
+
+        <div class="item-form-group">
+            <label for="item-form-name">Name</label>
+            <input type="text" id="item-form-name" />
+        </div>
+
+        <div class="item-form-group">
+            <label for="item-form-description">Description</label>
+            <textarea id="item-form-description"></textarea>
+        </div>
+
+        <div class="item-form-group">
+            <label for="item-form-price">Price</label>
+            <input type="number" id="item-form-price" min="0" step="0.01" />
+        </div>
+
+        <div class="item-form-group">
+            <label for="item-form-category-select">Category</label>
+            <select id="item-form-category-select">
+                <option value="__new__">+ New category...</option>
+            </select>
+        </div>
+
+        <div class="item-form-group" id="item-form-new-category-group" style="display: none;">
+            <label for="item-form-new-category">New Category Name</label>
+            <input type="text" id="item-form-new-category" />
+        </div>
+
+        <div class="item-form-group">
+            <div class="item-form-checkbox-row">
+                <input type="checkbox" id="item-form-spicy" />
+                <label for="item-form-spicy">Spicy</label>
+            </div>
+            <div class="item-form-checkbox-row">
+                <input type="checkbox" id="item-form-jain" />
+                <label for="item-form-jain">Jain Available</label>
+            </div>
+            <div class="item-form-checkbox-row">
+                <input type="checkbox" id="item-form-signature" />
+                <label for="item-form-signature">Signature Dish</label>
+            </div>
+            <div class="item-form-checkbox-row">
+                <input type="checkbox" id="item-form-requires-variant" />
+                <label for="item-form-requires-variant">Requires Variant Selection</label>
+            </div>
+        </div>
+
+        <div class="item-form-group" id="item-form-variant-group" style="display: none;">
+            <label for="item-form-variant-options">Variant Options (comma-separated)</label>
+            <input type="text" id="item-form-variant-options" placeholder="Small, Medium, Large" />
+        </div>
+
+        <button type="button" class="item-form-submit-btn" id="item-form-submit-btn">Save Item</button>
+    </div>
+</div>
+<div class="item-form-overlay" id="addon-form-overlay">
+    <div class="item-form-sheet">
+        <div class="item-form-header">
+            <span id="addon-form-title">Add Addon</span>
+            <button type="button" class="filter-close" id="addon-form-close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="item-form-error" id="addon-form-error"></div>
+
+        <div class="item-form-group">
+            <label for="addon-form-name">Name</label>
+            <input type="text" id="addon-form-name" />
+        </div>
+
+        <div class="item-form-group">
+            <label for="addon-form-price">Price</label>
+            <input type="number" id="addon-form-price" min="0" step="0.01" />
+        </div>
+
+        <button type="button" class="item-form-submit-btn" id="addon-form-submit-btn">Save Addon</button>
+    </div>
+</div>
+<div class="item-form-overlay" id="category-form-overlay">
+    <div class="item-form-sheet">
+        <div class="item-form-header">
+            <span id="category-form-title">Add Category</span>
+            <button type="button" class="filter-close" id="category-form-close-btn" aria-label="Close">&times;</button>
+        </div>
+
+        <div class="item-form-error" id="category-form-error"></div>
+
+        <div class="item-form-group">
+            <label for="category-form-name">Name</label>
+            <input type="text" id="category-form-name" />
+        </div>
+
+        <div class="item-form-group">
+            <label for="category-form-order">Display Order</label>
+            <input type="number" id="category-form-order" min="0" step="1" placeholder="Leave blank to add at the end" />
+        </div>
+
+        <button type="button" class="item-form-submit-btn" id="category-form-submit-btn">Save Category</button>
+    </div>
+</div>
+<div class="item-form-overlay" id="table-form-overlay">
+    <div class="item-form-sheet">
+        <div class="item-form-header">
+            <span>Add Table</span>
+            <button type="button" class="filter-close" id="table-form-close-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="item-form-error" id="table-form-error"></div>
+        <div class="item-form-group">
+            <label for="table-form-number">Table Number</label>
+            <input type="text" id="table-form-number" placeholder="e.g. 12" />
+        </div>
+        <button type="button" class="item-form-submit-btn" id="table-form-submit-btn">Save Table</button>
+    </div>
+</div>
+<script>
+    window.showToast = function (message) {
+        var container = document.getElementById('toast-container');
+        if (!container) return;
+        var toast = document.createElement('div');
+        toast.textContent = message;
+        toast.style.cssText = 'background:#2e7d32;color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;font-weight:bold;box-shadow:0 2px 8px rgba(0,0,0,0.25);opacity:0;transition:opacity .2s ease;';
+        container.appendChild(toast);
+        requestAnimationFrame(function () { toast.style.opacity = '1'; });
+        setTimeout(function () {
+            toast.style.opacity = '0';
+            setTimeout(function () { toast.remove(); }, 200);
+        }, 2200);
+    };
+</script>
+<script>
+    (function () {
+        var POLL_INTERVAL_MS = 8000;
+        var PAGE_SIZE = 20;
+
+        var currentTab = 'NEW';
+        var currentPage = 0;
+        var filters = { customerName: '', tableNumber: '', date: '' };
+        var expandedOrderIds = new Set();
+        var collapsedTableGroups = new Set();
+        var orderDetailCache = {};
+        var pendingTablesWithNewOrders = new Set();
+        var pollTimer = null;
+
+        var container = document.getElementById('orders-container');
+        var lastUpdated = document.getElementById('last-updated');
+        var errorBanner = document.getElementById('error-banner');
+        var tabButtons = document.querySelectorAll('.tab-btn');
+
+        var filterIconBtn = document.getElementById('filter-icon-btn');
+        var filterDot = document.getElementById('filter-dot');
+        var filterOverlay = document.getElementById('filter-overlay');
+        var filterCloseBtn = document.getElementById('filter-close-btn');
+        var filterTableInput = document.getElementById('filter-table');
+        var filterNameInput = document.getElementById('filter-name');
+        var filterDateInput = document.getElementById('filter-date');
+        var applyFilterBtn = document.getElementById('apply-filter-btn');
+        var clearFilterBtn = document.getElementById('clear-filter-btn');
+
+        var statusDivider = document.getElementById('status-divider');
+        var paginationControls = document.getElementById('pagination-controls');
+        var pageInfo = document.getElementById('page-info');
+        var prevPageBtn = document.getElementById('prev-page-btn');
+        var nextPageBtn = document.getElementById('next-page-btn');
+        var datePlaceholder = document.getElementById('date-placeholder');
+
+        function syncDatePlaceholder() {
+            var hasValue = !!filterDateInput.value;
+            datePlaceholder.style.display = hasValue ? 'none' : 'block';
+            filterDateInput.classList.toggle('has-value', hasValue);
+        }
+
+        filterDateInput.addEventListener('input', syncDatePlaceholder);
+        filterDateInput.addEventListener('change', syncDatePlaceholder);
+
+        var STATUS_FLOW = {
+            'PLACED': [{ label: 'Accept Order', next: 'ACCEPTED', cls: 'accept' }]
+        };
+
+        function isLiveTab() {
+            return currentTab === 'NEW' || currentTab === 'ACCEPTED';
+        }
+
+        function hasActiveFilters() {
+            return !!(filters.customerName || filters.tableNumber || filters.date);
+        }
+
+        function formatMoney(amount) {
+            var n = parseFloat(amount) || 0;
+            return '\u20B9' + n.toFixed(2).replace(/\.00$/, '');
+        }
+
+        function timeAgo(isoString) {
+            var then = new Date(isoString).getTime();
+            var diffMs = Date.now() - then;
+            var mins = Math.floor(diffMs / 60000);
+            if (mins < 1) return 'just now';
+            if (mins < 60) return mins + ' min ago';
+            var hrs = Math.floor(mins / 60);
+            return hrs + 'h ' + (mins % 60) + 'm ago';
+        }
+
+        function formatDateTime(isoString) {
+            var d = new Date(isoString);
+            return d.toLocaleString(undefined, {
+                day: '2-digit',
+                month: 'short',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function formatOrderTimestamp(order) {
+            if (order.status === 'SERVED' || order.status === 'CANCELLED') {
+                return formatDateTime(order.placedAt);
+            }
+            return timeAgo(order.placedAt);
+        }
+
+        function showError(msg) {
+            errorBanner.textContent = msg;
+            errorBanner.classList.add('visible');
+        }
+
+        function clearError() {
+            errorBanner.classList.remove('visible');
+        }
+
+        tabButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                tabButtons.forEach(function (b) { b.classList.remove('active'); });
+                btn.classList.add('active');
+                currentTab = btn.getAttribute('data-filter');
+                currentPage = 0;
+                expandedOrderIds.clear();
+                collapsedTableGroups.clear();
+                orderDetailCache = {};
+                container.innerHTML = ''; // structure differs between tabs (grouped/flat, live/paged)
+
+                filters = { customerName: '', tableNumber: '', date: '' };
+                filterTableInput.value = '';
+                filterNameInput.value = '';
+                filterDateInput.value = '';
+                filterDot.style.display = 'none';
+
+                loadOrders();
+                startPolling();
+            });
+        });
+
+        // ---- Filter sheet ----
+        filterIconBtn.addEventListener('click', function () {
+            filterTableInput.value = filters.tableNumber;
+            filterNameInput.value = filters.customerName;
+            filterDateInput.value = filters.date;
+            syncDatePlaceholder();
+            filterOverlay.classList.add('visible');
+        });
+
+        filterCloseBtn.addEventListener('click', function () {
+            filterOverlay.classList.remove('visible');
+        });
+
+        filterOverlay.addEventListener('click', function (e) {
+            if (e.target === filterOverlay) filterOverlay.classList.remove('visible');
+        });
+
+        applyFilterBtn.addEventListener('click', function () {
+            filters.tableNumber = filterTableInput.value.trim();
+            filters.customerName = filterNameInput.value.trim();
+            filters.date = filterDateInput.value;
+            syncDatePlaceholder();
+            currentPage = 0;
+            filterDot.style.display = hasActiveFilters() ? 'block' : 'none';
+            filterOverlay.classList.remove('visible');
+            loadOrders();
+        });
+
+        clearFilterBtn.addEventListener('click', function () {
+            filters = { customerName: '', tableNumber: '', date: '' };
+            filterTableInput.value = '';
+            filterNameInput.value = '';
+            filterDateInput.value = '';
+            syncDatePlaceholder();
+            filterDot.style.display = 'none';
+            currentPage = 0;
+            filterOverlay.classList.remove('visible');
+            loadOrders();
+        });
+
+        // ---- Pagination ----
+        prevPageBtn.addEventListener('click', function () {
+            if (currentPage > 0) {
+                currentPage -= 1;
+                loadOrders();
+            }
+        });
+
+        nextPageBtn.addEventListener('click', function () {
+            currentPage += 1;
+            loadOrders();
+        });
+
+        // ---- Data loading ----
+        function loadOrders(isBackgroundRefresh) {
+            var pageSize = isLiveTab() ? 200 : PAGE_SIZE;
+            var url = '/api/admin/orders?status=' + encodeURIComponent(currentTab)
+                + '&page=' + currentPage + '&size=' + pageSize;
+            if (filters.customerName) url += '&customerName=' + encodeURIComponent(filters.customerName);
+            if (filters.tableNumber) url += '&tableNumber=' + encodeURIComponent(filters.tableNumber);
+            if (filters.date) url += '&date=' + encodeURIComponent(filters.date);
+
+            var pendingTablesPromise = currentTab === 'ACCEPTED'
+                ? fetch('/api/admin/orders/pending-tables').then(function (res) {
+                    if (!res.ok) throw new Error('Failed to load pending tables');
+                    return res.json();
+                })
+                : Promise.resolve([]);
+
+            Promise.all([
+                fetch(url).then(function (res) {
+                    if (!res.ok) throw new Error('Failed to load orders (status ' + res.status + ')');
+                    return res.json();
+                }),
+                pendingTablesPromise
+            ])
+                .then(function (results) {
+                    pendingTablesWithNewOrders = new Set(results[1]);
+
+                    clearError();
+                    lastUpdated.textContent = 'Updated ' + new Date().toLocaleTimeString();
+                    renderOrders(results[0].content);
+                    updatePagination(results[0]);
+                })
+                .catch(function (err) {
+                    showError(err.message || 'Could not reach the server.');
+                });
+        }
+
+        function updatePagination(result) {
+            if (isLiveTab() || result.totalPages <= 1) {
+                statusDivider.style.display = 'none';
+                paginationControls.classList.remove('visible');
+                return;
+            }
+            statusDivider.style.display = 'inline';
+            paginationControls.classList.add('visible');
+            pageInfo.textContent = (result.page + 1) + '/' + result.totalPages;
+            prevPageBtn.disabled = result.page <= 0;
+            nextPageBtn.disabled = result.page >= result.totalPages - 1;
+        }
+
+        function renderOrders(orders) {
+            if (!orders.length) {
+                container.innerHTML = '<div class="empty-state">No orders here right now.</div>';
+                return;
+            }
+
+            if (container.querySelector('.empty-state')) {
+                container.innerHTML = ''; // clear the placeholder before the first real render
+            }
+
+            if (isLiveTab()) {
+                syncGroupedByTable(orders);
+            } else {
+                syncFlatList(orders);
+            }
+        }
+
+        function findCardById(root, orderId) {
+            var cards = root.querySelectorAll('.order-card');
+            for (var i = 0; i < cards.length; i++) {
+                if (cards[i].getAttribute('data-order-id') === String(orderId)) return cards[i];
+            }
+            return null;
+        }
+
+        function findGroupByTable(tableNumber) {
+            var groups = container.querySelectorAll('.table-group');
+            for (var i = 0; i < groups.length; i++) {
+                if (groups[i].getAttribute('data-table-number') === tableNumber) return groups[i];
+            }
+            return null;
+        }
+
+        function updateOrderCardSummary(card, order) {
+            card.className = 'order-card status-' + order.status;
+            var top = card.querySelector('.order-top');
+            top.querySelector('.order-table-badge').textContent = 'TABLE ' + order.tableNumber;
+            top.querySelector('.order-customer').textContent = order.customerName;
+            top.querySelector('.order-meta').textContent =
+                'Order #' + order.orderId + ' \u2022 ' + formatOrderTimestamp(order) + ' \u2022 ' + order.itemCount + ' item(s)';
+            top.querySelector('.order-total').textContent = formatMoney(order.totalAmount);
+            top.querySelector('.order-status-pill').textContent = order.status;
+        }
+
+        function syncCardsInto(bodyEl, tableOrders) {
+            var seenIds = {};
+            var previousCard = null;
+
+            tableOrders.forEach(function (order) {
+                seenIds[order.orderId] = true;
+                var existing = findCardById(bodyEl, order.orderId);
+
+                if (existing) {
+                    updateOrderCardSummary(existing, order); // never touches .order-details
+                } else {
+                    existing = buildOrderCard(order);
+                }
+
+                if (previousCard) {
+                    if (previousCard.nextSibling !== existing) bodyEl.insertBefore(existing, previousCard.nextSibling);
+                } else if (bodyEl.firstChild !== existing) {
+                    bodyEl.insertBefore(existing, bodyEl.firstChild);
+                }
+                previousCard = existing;
+            });
+
+            Array.prototype.slice.call(bodyEl.querySelectorAll('.order-card')).forEach(function (card) {
+                var id = card.getAttribute('data-order-id');
+                if (!seenIds[id]) {
+                    expandedOrderIds.delete(Number(id));
+                    delete orderDetailCache[id];
+                    card.remove();
+                }
+            });
+        }
+
+        function syncFlatList(orders) {
+            syncCardsInto(container, orders);
+        }
+
+        function attachGroupHeaderHandler(header) {
+            header.addEventListener('click', function (e) {
+                if (e.target.closest('.close-table-btn')) return; // never toggle collapse for a click on the button
+                var group = header.closest('.table-group');
+                group.classList.toggle('collapsed');
+
+                var tableNumber = group.getAttribute('data-table-number');
+                if (group.classList.contains('collapsed')) {
+                    collapsedTableGroups.add(tableNumber);
+                } else {
+                    collapsedTableGroups.delete(tableNumber);
+                }
+            });
+        }
+
+        function attachCloseButtonHandler(btn) {
+            btn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var tableNumber = btn.getAttribute('data-table-number');
+                if (!confirm('Mark all of Table ' + tableNumber + '\'s orders as served and free the table for the next guest?')) return;
+                closeTable(tableNumber, btn);
+            });
+        }
+
+        function syncGroupedByTable(orders) {
+            var groups = {};
+            var tableOrderSeq = [];
+            orders.forEach(function (order) {
+                if (!groups[order.tableNumber]) {
+                    groups[order.tableNumber] = [];
+                    tableOrderSeq.push(order.tableNumber);
+                }
+                groups[order.tableNumber].push(order);
+            });
+
+            var showCloseButton = currentTab === 'ACCEPTED';
+            var seenTables = {};
+            var previousSection = null;
+
+            tableOrderSeq.forEach(function (tableNumber) {
+                seenTables[tableNumber] = true;
+                var tableOrders = groups[tableNumber];
+                var tableTotal = tableOrders.reduce(function (sum, o) { return sum + (parseFloat(o.totalAmount) || 0); }, 0);
+
+                var section = findGroupByTable(tableNumber);
+
+                if (!section) {
+                    section = document.createElement('div');
+                    section.className = 'table-group' + (collapsedTableGroups.has(tableNumber) ? ' collapsed' : '');
+                    section.setAttribute('data-table-number', tableNumber);
+
+                    var closeBtnHtml = showCloseButton
+                        ? '<button type="button" class="close-table-btn" data-table-number="' + escapeHtml(tableNumber) + '">Settle &amp; Close</button>'
+                        : '';
+
+                    section.innerHTML =
+                        '<div class="table-group-header">' +
+                        '<div class="table-group-header-left">' +
+                        '<span class="table-group-toggle-icon">&#9660;</span>' +
+                        '<span class="table-group-title">TABLE ' + escapeHtml(tableNumber) + '</span>' +
+                        '<span class="table-group-count"></span>' +
+                        '</div>' +
+                        closeBtnHtml +
+                        '</div>' +
+                        '<div class="table-group-body"></div>';
+
+                    attachGroupHeaderHandler(section.querySelector('.table-group-header'));
+                }
+
+                if (showCloseButton) {
+                    var closeBtn = section.querySelector('.close-table-btn');
+                    if (closeBtn) {
+                        var hasPendingNew = pendingTablesWithNewOrders.has(tableNumber);
+                        closeBtn.disabled = hasPendingNew;
+                        closeBtn.title = hasPendingNew ? "Accept this table's New order(s) first" : '';
+                        if (!closeBtn.dataset.handlerAttached) {
+                            attachCloseButtonHandler(closeBtn);
+                            closeBtn.dataset.handlerAttached = '1';
+                        }
+                    }
+                }
+
+                section.querySelector('.table-group-count').textContent =
+                    tableOrders.length + ' order(s) \u2022 ' + formatMoney(tableTotal);
+
+                syncCardsInto(section.querySelector('.table-group-body'), tableOrders);
+
+                if (previousSection) {
+                    if (previousSection.nextSibling !== section) container.insertBefore(section, previousSection.nextSibling);
+                } else if (container.firstChild !== section) {
+                    container.insertBefore(section, container.firstChild);
+                }
+                previousSection = section;
+            });
+
+            Array.prototype.slice.call(container.querySelectorAll('.table-group')).forEach(function (section) {
+                var tableNumber = section.getAttribute('data-table-number');
+                if (!seenTables[tableNumber]) {
+                    section.querySelectorAll('.order-card').forEach(function (card) {
+                        var id = Number(card.getAttribute('data-order-id'));
+                        expandedOrderIds.delete(id);
+                        delete orderDetailCache[id];
+                    });
+                    collapsedTableGroups.delete(tableNumber);
+                    section.remove();
+                }
+            });
+        }
+
+        function buildOrderCard(order) {
+            var card = document.createElement('div');
+            card.className = 'order-card status-' + order.status;
+            card.setAttribute('data-order-id', order.orderId);
+
+            var isOpen = expandedOrderIds.has(order.orderId);
+
+            card.innerHTML =
+                '<div class="order-top" data-toggle="' + order.orderId + '">' +
+                '<div>' +
+                '<span class="order-table-badge">TABLE ' + order.tableNumber + '</span>' +
+                '<div class="order-customer">' + escapeHtml(order.customerName) + '</div>' +
+                '<div class="order-meta">Order #' + order.orderId + ' &bull; ' + formatOrderTimestamp(order) + ' &bull; ' + order.itemCount + ' item(s)</div>' +
+                '</div>' +
+                '<div class="order-right">' +
+                '<div class="order-total">' + formatMoney(order.totalAmount) + '</div>' +
+                '<span class="order-status-pill">' + order.status + '</span>' +
+                '</div>' +
+                '</div>' +
+                '<div class="order-details' + (isOpen ? ' open' : '') + '" id="details-' + order.orderId + '"></div>';
+
+            card.querySelector('.order-top').addEventListener('click', function () {
+                toggleDetails(order.orderId);
+            });
+
+            if (isOpen) loadDetail(order.orderId);
+            return card;
+        }
+
+        function renderGroupedByTable(orders) {
+            var groups = {};
+            var tableOrder = [];
+            orders.forEach(function (order) {
+                if (!groups[order.tableNumber]) {
+                    groups[order.tableNumber] = [];
+                    tableOrder.push(order.tableNumber);
+                }
+                groups[order.tableNumber].push(order);
+            });
+
+            var showCloseButton = currentTab === 'ACCEPTED'; // NEW tab never shows it
+
+            tableOrder.forEach(function (tableNumber) {
+                var tableOrders = groups[tableNumber];
+                var tableTotal = tableOrders.reduce(function (sum, o) { return sum + (parseFloat(o.totalAmount) || 0); }, 0);
+
+                var section = document.createElement('div');
+                section.className = 'table-group' + (collapsedTableGroups.has(tableNumber) ? ' collapsed' : '');
+                section.setAttribute('data-table-number', tableNumber);
+
+                var closeBtnHtml = showCloseButton
+                    ? '<button type="button" class="close-table-btn" data-table-number="' + escapeHtml(tableNumber) + '">Settle &amp; Close</button>'
+                    : '';
+
+                section.innerHTML =
+                    '<div class="table-group-header">' +
+                    '<div class="table-group-header-left">' +
+                    '<span class="table-group-toggle-icon">&#9660;</span>' +
+                    '<span class="table-group-title">TABLE ' + escapeHtml(tableNumber) + '</span>' +
+                    '<span class="table-group-count">' + tableOrders.length + ' order(s) &bull; ' + formatMoney(tableTotal) + '</span>' +
+                    '</div>' +
+                    closeBtnHtml +
+                    '</div>' +
+                    '<div class="table-group-body"></div>';
+
+                var body = section.querySelector('.table-group-body');
+                tableOrders.forEach(function (order) { body.appendChild(buildOrderCard(order)); });
+
+                container.appendChild(section);
+            });
+
+            container.querySelectorAll('.table-group-header').forEach(function (header) {
+                header.addEventListener('click', function () {
+                    var group = header.closest('.table-group');
+                    group.classList.toggle('collapsed');
+
+                    var tableNumber = group.getAttribute('data-table-number');
+                    if (group.classList.contains('collapsed')) {
+                        collapsedTableGroups.add(tableNumber);
+                    } else {
+                        collapsedTableGroups.delete(tableNumber);
+                    }
+                });
+            });
+
+            container.querySelectorAll('.close-table-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation(); // stops the click from also toggling collapse
+                    var tableNumber = btn.getAttribute('data-table-number');
+                    if (!confirm('Mark all of Table ' + tableNumber + '\'s orders as served and free the table for the next guest?')) return;
+                    closeTable(tableNumber, btn);
+                });
+            });
+        }
+
+        function closeTable(tableNumber, btn) {
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = 'Closing...';
+
+            fetch('/api/admin/orders/close-table/' + encodeURIComponent(tableNumber), { method: 'POST' })
+                .then(function (res) {
+                    if (!res.ok) return res.text().then(function (msg) { throw new Error(msg || 'Could not close table.'); });
+                    window.showToast('Table ' + tableNumber + ' settled and freed for the next guest');
+                    loadOrders();
+                })
+                .catch(function (err) {
+                    showError(err.message || 'Could not close table.');
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+        }
+
+        function toggleDetails(orderId) {
+            var el = document.getElementById('details-' + orderId);
+            if (!el) return;
+
+            if (expandedOrderIds.has(orderId)) {
+                expandedOrderIds.delete(orderId);
+                el.classList.remove('open');
+            } else {
+                expandedOrderIds.add(orderId);
+                el.classList.add('open');
+                loadDetail(orderId);
+            }
+        }
+
+        function loadDetail(orderId) {
+            var el = document.getElementById('details-' + orderId);
+            if (!el) return;
+
+            var cached = orderDetailCache[orderId];
+            if (cached) {
+                renderDetail(el, cached); // already have it — show immediately, no flash
+            } else {
+                el.innerHTML = '<div style="padding:10px 0;color:#7a6a5d;font-size:13px;">Loading details...</div>';
+            }
+
+            fetch('/api/admin/orders/' + orderId)
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Failed to load order detail');
+                    return res.json();
+                })
+                .then(function (detail) {
+                    orderDetailCache[orderId] = detail;
+                    var target = document.getElementById('details-' + orderId);
+                    if (!target) return;
+                    renderDetail(target, detail);
+                })
+                .catch(function (err) {
+                    if (cached) return; // keep the last good content rather than replacing it with an error
+                    var target = document.getElementById('details-' + orderId);
+                    if (target) target.innerHTML = '<div style="color:var(--red);font-size:13px;">' + (err.message || 'Could not load details.') + '</div>';
+                });
+        }
+
+        function renderDetail(el, detail) {
+            var itemsHtml = detail.items.map(function (item) {
+                var variantHtml = item.selectedVariant
+                    ? '<div class="detail-line-sub">' + escapeHtml(item.selectedVariant) + '</div>'
+                    : '';
+
+                var addonsHtml = '';
+                if (item.addons && item.addons.length > 0) {
+                    addonsHtml = item.addons.map(function (addon) {
+                        var addonQtyPrefix = addon.quantity > 1 ? (addon.quantity + ' x ') : '';
+                        return '<div class="detail-line-sub">+ ' + addonQtyPrefix + escapeHtml(addon.addonName) +
+                            ' (' + formatMoney(addon.lineTotal) + ')</div>';
+                    }).join('');
+                }
+
+                var noteHtml = item.specialNote
+                    ? '<div class="detail-line-sub">Note: ' + escapeHtml(item.specialNote) + '</div>'
+                    : '';
+
+                return '<div class="detail-line">' +
+                    '<div><div class="detail-line-name">' + item.quantity + ' x ' + escapeHtml(item.itemName) + '</div>' +
+                    variantHtml + addonsHtml + noteHtml + '</div>' +
+                    '<div>' + formatMoney(item.lineTotal) + '</div>' +
+                    '</div>';
+            }).join('');
+
+            var phoneHtml = detail.phoneNumber
+                ? '<a class="phone-link" href="tel:' + detail.phoneNumber + '">' + detail.phoneNumber + '</a>'
+                : '<span style="color:#7a6a5d;">Not provided</span>';
+
+            var actionsHtml = '';
+            var nextActions = STATUS_FLOW[detail.status] || [];
+            nextActions.forEach(function (action) {
+                actionsHtml += '<button class="action-btn ' + action.cls + '" data-next-status="' + action.next + '" data-order-id="' + detail.orderId + '">' + action.label + '</button>';
+            });
+            if (detail.status !== 'SERVED' && detail.status !== 'CANCELLED') {
+                actionsHtml += '<button class="action-btn cancel" data-next-status="CANCELLED" data-order-id="' + detail.orderId + '">Cancel Order</button>';
+            }
+
+            el.innerHTML =
+                '<div style="font-size:13px;margin-bottom:8px;">Phone: ' + phoneHtml + '</div>' +
+                itemsHtml +
+                '<div class="tax-line"><span>Subtotal</span><span>' + formatMoney(detail.subtotalAmount) + '</span></div>' +
+                '<div class="tax-line"><span>CGST (2.5%)</span><span>' + formatMoney(detail.cgstAmount) + '</span></div>' +
+                '<div class="tax-line"><span>SGST (2.5%)</span><span>' + formatMoney(detail.sgstAmount) + '</span></div>' +
+                '<div class="tax-line total"><span>Total</span><span>' + formatMoney(detail.totalAmount) + '</span></div>' +
+                (actionsHtml ? '<div class="action-row">' + actionsHtml + '</div>' : '');
+
+            el.querySelectorAll('.action-btn').forEach(function (btn) {
+                btn.addEventListener('click', function (e) {
+                    e.stopPropagation();
+                    var orderId = btn.getAttribute('data-order-id');
+                    var nextStatus = btn.getAttribute('data-next-status');
+                    if (nextStatus === 'CANCELLED' && !confirm('Cancel this order?')) return;
+                    updateStatus(orderId, nextStatus, btn);
+                });
+            });
+        }
+
+        function updateStatus(orderId, nextStatus, btn) {
+            btn.disabled = true;
+            var originalText = btn.textContent;
+            btn.textContent = 'Updating...';
+
+            fetch('/api/admin/orders/' + orderId + '/status', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: nextStatus })
+            })
+                .then(function (res) {
+                    if (!res.ok) return res.text().then(function (msg) { throw new Error(msg || 'Update failed'); });
+                    return res.json();
+                })
+                .then(function () {
+                    loadOrders();
+                })
+                .catch(function (err) {
+                    showError(err.message || 'Could not update order status.');
+                    btn.disabled = false;
+                    btn.textContent = originalText;
+                });
+        }
+
+        function escapeHtml(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function startPolling() {
+            if (pollTimer) clearInterval(pollTimer);
+            if (isLiveTab()) {
+                pollTimer = setInterval(function () { loadOrders(true); }, POLL_INTERVAL_MS);
+            }
+        }
+
+        loadOrders();
+        startPolling();
+    })();
+</script>
+
+<script>
+    (function () {
+        var sidebar = document.getElementById('sidebar');
+        var sidebarOverlay = document.getElementById('sidebar-overlay');
+        var sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        var sidebarCloseBtn = document.getElementById('sidebar-close-btn');
+        var sidebarLinks = document.querySelectorAll('.sidebar-link');
+
+        var viewDashboard = document.getElementById('view-dashboard');
+        var viewMenuItems = document.getElementById('view-menu-items');
+        var menuItemsContainer = document.getElementById('menu-items-container');
+
+        var menuItemsLoaded = false;
+        var menuItemsLoaded = false;
+        var menuItemsCache = null;
+
+        function openSidebar() {
+            sidebar.classList.add('visible');
+            sidebarOverlay.classList.add('visible');
+        }
+
+        function closeSidebar() {
+            sidebar.classList.remove('visible');
+            sidebarOverlay.classList.remove('visible');
+        }
+
+        sidebarToggleBtn.addEventListener('click', openSidebar);
+        sidebarCloseBtn.addEventListener('click', closeSidebar);
+        sidebarOverlay.addEventListener('click', closeSidebar);
+
+        function showView(view) {
+            sidebarLinks.forEach(function (link) {
+                link.classList.toggle('active', link.getAttribute('data-view') === view);
+            });
+
+            var bottomStatusBar = document.getElementById('bottom-status-bar');
+
+            if (view === 'menu-items') {
+                viewDashboard.classList.remove('active');
+                if (window.__hideManageAddonsView) window.__hideManageAddonsView();
+                if (window.__hideManageCategoriesView) window.__hideManageCategoriesView();
+                if (window.__hideManageTablesView) window.__hideManageTablesView();
+                viewMenuItems.classList.add('active');
+                if (bottomStatusBar) bottomStatusBar.style.display = 'none';
+                if (!menuItemsLoaded) { loadMenuItems(); }
+            } else if (view === 'manage-addons') {
+                viewDashboard.classList.remove('active');
+                viewMenuItems.classList.remove('active');
+                if (window.__hideManageCategoriesView) window.__hideManageCategoriesView();
+                if (window.__hideManageTablesView) window.__hideManageTablesView();
+                if (window.__showManageAddonsView) window.__showManageAddonsView();
+            } else if (view === 'manage-categories') {
+                viewDashboard.classList.remove('active');
+                viewMenuItems.classList.remove('active');
+                if (window.__hideManageAddonsView) window.__hideManageAddonsView();
+                if (window.__hideManageTablesView) window.__hideManageTablesView();
+                if (window.__showManageCategoriesView) window.__showManageCategoriesView();
+            } else if (view === 'manage-tables') {
+                viewDashboard.classList.remove('active');
+                viewMenuItems.classList.remove('active');
+                if (window.__hideManageAddonsView) window.__hideManageAddonsView();
+                if (window.__hideManageCategoriesView) window.__hideManageCategoriesView();
+                if (bottomStatusBar) bottomStatusBar.style.display = 'none';
+                if (window.__showManageTablesView) window.__showManageTablesView();
+            } else {
+                viewMenuItems.classList.remove('active');
+                if (window.__hideManageAddonsView) window.__hideManageAddonsView();
+                if (window.__hideManageCategoriesView) window.__hideManageCategoriesView();
+                if (window.__hideManageTablesView) window.__hideManageTablesView();
+                viewDashboard.classList.add('active');
+                if (bottomStatusBar) bottomStatusBar.style.display = '';
+            }
+        }
+
+        sidebarLinks.forEach(function (link) {
+            link.addEventListener('click', function () {
+                showView(link.getAttribute('data-view'));
+                closeSidebar();
+            });
+        });
+
+        function escapeHtmlLocal(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function formatMoneyLocal(amount) {
+            var num = Number(amount) || 0;
+            return '\u20B9' + num.toFixed(2).replace(/\.00$/, '');
+        }
+
+        function renderMenuItems(categories) {
+            if (!categories || categories.length === 0) {
+                menuItemsContainer.innerHTML = '<div class="empty-state">No menu items found.</div>';
+                return;
+            }
+
+            var html = '';
+            categories.forEach(function (category) {
+                if (!category.items || category.items.length === 0) return;
+                html += '<div class="menu-admin-category">';
+                html += '<h2>' + escapeHtmlLocal(category.categoryName) + '</h2>';
+                category.items.forEach(function (item) {
+                    var isStockedToday = !!item.dailyAvailable;
+                    var isEnabled = !!item.available;
+                    html +=
+                        '<div class="menu-admin-item' + (isEnabled ? '' : ' item-disabled') + '" data-item-id="' + item.id + '">' +
+                        '<div class="menu-admin-item-image">' +
+                        (item.imageUrl
+                            ? '<img src="' + escapeHtmlLocal(item.imageUrl) + '" alt="" />'
+                            : '&#127860;') +
+                        '</div>' +
+                        '<div class="menu-admin-item-info">' +
+                        '<div class="menu-admin-item-name">' + escapeHtmlLocal(item.name) + '</div>' +
+                        '<div class="menu-admin-item-price">' + formatMoneyLocal(item.price) + '</div>' +
+                        '</div>' +
+                        '<div class="menu-admin-item-actions">' +
+                        '<div class="menu-admin-item-buttons">' +
+                        '<button type="button" class="item-edit-btn" data-item-id="' + item.id + '"' + (isEnabled ? '' : ' disabled title="Enable the item first to edit"') + ' aria-label="Edit item">' +
+                        '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
+                        '</button>' +
+                        '<button type="button" class="item-delete-btn" data-item-id="' + item.id + '"' + (isEnabled ? ' disabled title="Disable the item first to delete"' : '') + ' aria-label="Delete item">' +
+                        '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>' +
+                        '</button>' +
+                        '</div>' +
+                        '<div class="enable-toggle-row">' +
+                        '<span class="availability-label ' + (isEnabled ? 'available' : 'unavailable') + '">' +
+                        (isEnabled ? 'Enabled' : 'Disabled') +
+                        '</span>' +
+                        '<label class="switch">' +
+                        '<input type="checkbox" class="enable-checkbox" data-item-id="' + item.id + '" ' + (isEnabled ? 'checked' : '') + ' />' +
+                        '<span class="switch-slider"></span>' +
+                        '</label>' +
+                        '</div>' +
+                        '<div class="daily-toggle-row">' +
+                        '<span class="availability-label ' + (isStockedToday ? 'available' : 'unavailable') + '">' +
+                        (isStockedToday ? 'In Stock' : 'Out of Stock') +
+                        '</span>' +
+                        '<label class="switch">' +
+                        '<input type="checkbox" class="availability-checkbox" ' + (isStockedToday ? 'checked' : '') + (isEnabled ? '' : ' disabled') + ' />' +
+                        '<span class="switch-slider"></span>' +
+                        '</label>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>';
+                });
+                html += '</div>';
+            });
+
+            menuItemsContainer.innerHTML = html || '<div class="empty-state">No menu items found.</div>';
+        }
+
+        function loadMenuItems() {
+            menuItemsContainer.innerHTML = '<div class="empty-state">Loading menu items...</div>';
+            fetch('/api/admin/menu/items')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Could not load menu items.');
+                    return res.json();
+                })
+                .then(function (data) {
+                    menuItemsLoaded = true;
+                    menuItemsCache = data;
+                    renderMenuItems(data);
+                    if (window.__onMenuItemsLoaded) window.__onMenuItemsLoaded(data);
+                })
+                .catch(function () {
+                    menuItemsContainer.innerHTML = '<div class="empty-state">Could not load menu items. Pull down to retry.</div>';
+                });
+        }
+
+        menuItemsContainer.addEventListener('change', function (e) {
+            var checkbox = e.target.closest('.availability-checkbox');
+            if (!checkbox) return;
+
+            var itemRow = checkbox.closest('.menu-admin-item');
+            var itemId = itemRow.getAttribute('data-item-id');
+            var label = itemRow.querySelector('.daily-toggle-row .availability-label');
+            var newValue = checkbox.checked;
+
+            checkbox.disabled = true;
+
+            fetch('/api/admin/menu/items/' + itemId + '/daily-availability', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ dailyAvailable: newValue })
+            })
+                .then(function (res) {
+                    if (!res.ok) {
+                        return res.text().then(function (msg) { throw new Error(msg || 'Could not update availability.'); });
+                    }
+                    return res.json();
+                })
+                .then(function (data) {
+                    var isAvailable = !!data.dailyAvailable;
+                    checkbox.checked = isAvailable;
+                    label.textContent = isAvailable ? 'In Stock' : 'Out of Stock';
+                    label.classList.toggle('available', isAvailable);
+                    label.classList.toggle('unavailable', !isAvailable);
+                    window.showToast(isAvailable ? 'Marked in stock' : 'Marked out of stock');
+                })
+                .catch(function () {
+                    checkbox.checked = !newValue;
+                })
+                .finally(function () {
+                    checkbox.disabled = false;
+                });
+        });
+
+        menuItemsContainer.addEventListener('change', function (e) {
+            var checkbox = e.target.closest('.enable-checkbox');
+            if (!checkbox) return;
+
+            var itemId = checkbox.getAttribute('data-item-id');
+            var itemRow = checkbox.closest('.menu-admin-item');
+            var label = itemRow.querySelector('.enable-toggle-row .availability-label');
+            var deleteBtn = itemRow.querySelector('.item-delete-btn');
+            var editBtn = itemRow.querySelector('.item-edit-btn');
+            var stockCheckbox = itemRow.querySelector('.availability-checkbox');
+            var newValue = checkbox.checked;
+
+            checkbox.disabled = true;
+
+            fetch('/api/admin/menu/items/' + itemId + '/active', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ available: newValue })
+            })
+                .then(function (res) {
+                    if (!res.ok) {
+                        return res.text().then(function (msg) { throw new Error(msg || 'Could not update item.'); });
+                    }
+                    return res.json();
+                })
+                .then(function (data) {
+                    var isEnabled = !!data.available;
+                    checkbox.checked = isEnabled;
+                    label.textContent = isEnabled ? 'Enabled' : 'Disabled';
+                    label.classList.toggle('available', isEnabled);
+                    label.classList.toggle('unavailable', !isEnabled);
+                    itemRow.classList.toggle('item-disabled', !isEnabled);
+                    if (deleteBtn) {
+                        deleteBtn.disabled = isEnabled;
+                        deleteBtn.title = isEnabled ? 'Disable the item first to delete' : '';
+                    }
+                    if (editBtn) {
+                        editBtn.disabled = !isEnabled;
+                        editBtn.title = isEnabled ? '' : 'Enable the item first to edit';
+                    }
+                    if (stockCheckbox) {
+                        stockCheckbox.disabled = !isEnabled;
+                    }
+                    window.showToast(isEnabled ? 'Item enabled' : 'Item disabled');
+                })
+                .catch(function (err) {
+                    checkbox.checked = !newValue;
+                    alert(err.message || 'Could not update item.');
+                })
+                .finally(function () {
+                    checkbox.disabled = false;
+                });
+        });
+        window.__reloadMenuItems = loadMenuItems;
+    })();
+</script>
+
+<script>
+    (function () {
+        var overlay = document.getElementById('item-form-overlay');
+        var titleEl = document.getElementById('item-form-title');
+        var errorEl = document.getElementById('item-form-error');
+        var nameInput = document.getElementById('item-form-name');
+        var descInput = document.getElementById('item-form-description');
+        var priceInput = document.getElementById('item-form-price');
+        var categorySelect = document.getElementById('item-form-category-select');
+        var newCategoryGroup = document.getElementById('item-form-new-category-group');
+        var newCategoryInput = document.getElementById('item-form-new-category');
+        var spicyInput = document.getElementById('item-form-spicy');
+        var jainInput = document.getElementById('item-form-jain');
+        var signatureInput = document.getElementById('item-form-signature');
+        var requiresVariantInput = document.getElementById('item-form-requires-variant');
+        var variantGroup = document.getElementById('item-form-variant-group');
+        var variantOptionsInput = document.getElementById('item-form-variant-options');
+        var submitBtn = document.getElementById('item-form-submit-btn');
+        var addItemBtn = document.getElementById('add-item-btn');
+        var closeBtn = document.getElementById('item-form-close-btn');
+        var menuItemsContainer = document.getElementById('menu-items-container');
+
+        var editingItemId = null;
+        var categoriesCache = [];
+
+        function escapeHtmlLocal2(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function populateCategoryOptions(selectedCategoryId) {
+            var options = categoriesCache.map(function (cat) {
+                var selected = String(cat.categoryId) === String(selectedCategoryId) ? ' selected' : '';
+                return '<option value="' + cat.categoryId + '"' + selected + '>' + escapeHtmlLocal2(cat.categoryName) + '</option>';
+            }).join('');
+            categorySelect.innerHTML = options + '<option value="__new__">+ New category...</option>';
+        }
+
+        function loadCategoriesForForm(item) {
+            fetch('/api/admin/categories')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Could not load categories.');
+                    return res.json();
+                })
+                .then(function (allCategories) {
+                    categoriesCache = allCategories
+                        .filter(function (cat) {
+                            return cat.active || (item && String(cat.id) === String(item.categoryId));
+                        })
+                        .map(function (cat) {
+                            return {
+                                categoryId: cat.id,
+                                categoryName: cat.active ? cat.name : (cat.name + ' (Inactive)')
+                            };
+                        });
+                    openForm(item);
+                })
+                .catch(function () {
+                    openForm(item);
+                });
+        }
+
+        categorySelect.addEventListener('change', function () {
+            newCategoryGroup.style.display = categorySelect.value === '__new__' ? 'block' : 'none';
+        });
+
+        requiresVariantInput.addEventListener('change', function () {
+            variantGroup.style.display = requiresVariantInput.checked ? 'block' : 'none';
+        });
+
+        function resetForm() {
+            nameInput.value = '';
+            descInput.value = '';
+            priceInput.value = '';
+            spicyInput.checked = false;
+            jainInput.checked = false;
+            signatureInput.checked = false;
+            requiresVariantInput.checked = false;
+            variantOptionsInput.value = '';
+            variantGroup.style.display = 'none';
+            newCategoryGroup.style.display = 'none';
+            newCategoryInput.value = '';
+            errorEl.classList.remove('visible');
+            errorEl.textContent = '';
+        }
+
+        function openForm(item) {
+            resetForm();
+            editingItemId = item ? item.id : null;
+            titleEl.textContent = item ? 'Edit Item' : 'Add Item';
+            submitBtn.textContent = item ? 'Save Changes' : 'Save Item';
+
+            populateCategoryOptions(item ? item.categoryId : null);
+
+            if (item) {
+                nameInput.value = item.name || '';
+                descInput.value = item.description || '';
+                priceInput.value = item.price != null ? item.price : '';
+                spicyInput.checked = !!item.spicy;
+                jainInput.checked = !!item.jainAvailable;
+                signatureInput.checked = !!item.signature;
+                requiresVariantInput.checked = !!item.requiresVariantSelection;
+                variantOptionsInput.value = item.variantOptions || '';
+                variantGroup.style.display = item.requiresVariantSelection ? 'block' : 'none';
+            }
+
+            overlay.classList.add('visible');
+        }
+
+        function closeForm() {
+            overlay.classList.remove('visible');
+            editingItemId = null;
+        }
+
+        addItemBtn.addEventListener('click', function () {
+            loadCategoriesForForm(null);
+        });
+
+        closeBtn.addEventListener('click', closeForm);
+
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeForm();
+        });
+
+        menuItemsContainer.addEventListener('click', function (e) {
+            var editBtn = e.target.closest('.item-edit-btn');
+            if (editBtn) {
+                if (editBtn.disabled) return;
+                var itemId = editBtn.getAttribute('data-item-id');
+                var found = null;
+                (window.__menuItemsFlatCache || []).some(function (it) {
+                    if (String(it.id) === itemId) { found = it; return true; }
+                    return false;
+                });
+                if (found) loadCategoriesForForm(found);
+                return;
+            }
+
+            var deleteBtn = e.target.closest('.item-delete-btn');
+            if (deleteBtn && !deleteBtn.disabled) {
+                var delItemId = deleteBtn.getAttribute('data-item-id');
+                if (!confirm('Delete this item? This cannot be undone.')) return;
+                deleteBtn.disabled = true;
+
+                fetch('/api/admin/menu/items/' + delItemId, { method: 'DELETE' })
+                    .then(function (res) {
+                        if (!res.ok) {
+                            return res.text().then(function (msg) { throw new Error(msg || 'Could not delete item.'); });
+                        }
+                        if (window.__reloadMenuItems) window.__reloadMenuItems();
+                        window.showToast('Item deleted');
+                    })
+                    .catch(function (err) {
+                        alert(err.message || 'Could not delete item.');
+                        deleteBtn.disabled = false;
+                    });
+            }
+        });
+
+        submitBtn.addEventListener('click', function () {
+            var name = nameInput.value.trim();
+            var price = parseFloat(priceInput.value);
+
+            errorEl.classList.remove('visible');
+
+            if (!name) {
+                errorEl.textContent = 'Name is required.';
+                errorEl.classList.add('visible');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                errorEl.textContent = 'A valid, non-negative price is required.';
+                errorEl.classList.add('visible');
+                return;
+            }
+
+            var payload = {
+                name: name,
+                description: descInput.value.trim(),
+                price: price,
+                spicy: spicyInput.checked,
+                jainAvailable: jainInput.checked,
+                signature: signatureInput.checked,
+                requiresVariantSelection: requiresVariantInput.checked,
+                variantOptions: requiresVariantInput.checked ? variantOptionsInput.value.trim() : null
+            };
+
+            if (categorySelect.value === '__new__') {
+                var newName = newCategoryInput.value.trim();
+                if (!newName) {
+                    errorEl.textContent = 'New category name is required.';
+                    errorEl.classList.add('visible');
+                    return;
+                }
+                payload.newCategoryName = newName;
+            } else {
+                payload.categoryId = parseInt(categorySelect.value, 10);
+            }
+
+            var url = editingItemId ? ('/api/admin/menu/items/' + editingItemId) : '/api/admin/menu/items';
+            var method = editingItemId ? 'PUT' : 'POST';
+
+            submitBtn.disabled = true;
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(function (res) {
+                    if (!res.ok) {
+                        return res.text().then(function (msg) { throw new Error(msg || 'Could not save item.'); });
+                    }
+                    return res.json();
+                })
+                .then(function () {
+                    var wasEdit = !!editingItemId;
+                    closeForm();
+                    if (window.__reloadMenuItems) window.__reloadMenuItems();
+                    window.showToast(wasEdit ? 'Item updated' : 'Item created');
+                })
+                .catch(function (err) {
+                    errorEl.textContent = err.message || 'Could not save item.';
+                    errorEl.classList.add('visible');
+                })
+                .finally(function () {
+                    submitBtn.disabled = false;
+                });
+        });
+
+        window.__onMenuItemsLoaded = function (categories) {
+            categoriesCache = categories.map(function (cat) {
+                return { categoryId: cat.categoryId, categoryName: cat.categoryName };
+            });
+
+            var flat = [];
+            categories.forEach(function (cat) {
+                (cat.items || []).forEach(function (it) { flat.push(it); });
+            });
+            window.__menuItemsFlatCache = flat;
+        };
+    })();
+</script>
+<script>
+    (function () {
+        var viewDashboard = document.getElementById('view-dashboard');
+        var viewMenuItems = document.getElementById('view-menu-items');
+        var viewManageAddons = document.getElementById('view-manage-addons');
+        var container = document.getElementById('manage-addons-container');
+        var bottomStatusBar = document.getElementById('bottom-status-bar');
+
+        var addonsLoaded = false;
+        var allAddonsCache = [];       // [{id, name, price, active}]
+        var boardCache = null;         // AdminAddonAssignmentBoardResponse
+        var activeSection = 'addons';  // 'addons' | 'assign'
+        var addonFormOverlay = document.getElementById('addon-form-overlay');
+        var addonFormTitle = document.getElementById('addon-form-title');
+        var addonFormError = document.getElementById('addon-form-error');
+        var addonFormNameInput = document.getElementById('addon-form-name');
+        var addonFormPriceInput = document.getElementById('addon-form-price');
+        var addonFormSubmitBtn = document.getElementById('addon-form-submit-btn');
+        var addonFormCloseBtn = document.getElementById('addon-form-close-btn');
+        var editingAddonId = null;
+
+        function openAddonForm(addon) {
+            editingAddonId = addon ? addon.id : null;
+            addonFormTitle.textContent = addon ? 'Edit Addon' : 'Add Addon';
+            addonFormSubmitBtn.textContent = addon ? 'Save Changes' : 'Save Addon';
+            addonFormNameInput.value = addon ? addon.name : '';
+            addonFormPriceInput.value = addon ? addon.price : '';
+            addonFormError.classList.remove('visible');
+            addonFormError.textContent = '';
+            addonFormOverlay.classList.add('visible');
+        }
+
+        function closeAddonForm() {
+            addonFormOverlay.classList.remove('visible');
+            editingAddonId = null;
+        }
+
+        addonFormCloseBtn.addEventListener('click', closeAddonForm);
+
+        addonFormOverlay.addEventListener('click', function (e) {
+            if (e.target === addonFormOverlay) closeAddonForm();
+        });
+
+        addonFormSubmitBtn.addEventListener('click', function () {
+            var name = addonFormNameInput.value.trim();
+            var price = parseFloat(addonFormPriceInput.value);
+
+            addonFormError.classList.remove('visible');
+
+            if (!name) {
+                addonFormError.textContent = 'Name is required.';
+                addonFormError.classList.add('visible');
+                return;
+            }
+            if (isNaN(price) || price < 0) {
+                addonFormError.textContent = 'A valid, non-negative price is required.';
+                addonFormError.classList.add('visible');
+                return;
+            }
+
+            var url = editingAddonId ? ('/api/admin/addons/' + editingAddonId) : '/api/admin/addons';
+            var method = editingAddonId ? 'PUT' : 'POST';
+
+            addonFormSubmitBtn.disabled = true;
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, price: price })
+            })
+                .then(function (res) {
+                    if (!res.ok) return res.text().then(function (msg) { throw new Error(msg || 'Could not save addon.'); });
+                    return res.json();
+                })
+                .then(function (saved) {
+                    var wasEdit = !!editingAddonId;
+                    if (wasEdit) {
+                        var idx = allAddonsCache.findIndex(function (a) { return a.id === saved.id; });
+                        if (idx !== -1) allAddonsCache[idx] = saved;
+                    } else {
+                        allAddonsCache.push(saved);
+                    }
+                    closeAddonForm();
+                    render();
+                    window.showToast(wasEdit ? 'Addon updated' : 'Addon created');
+                })
+                .catch(function (err) {
+                    addonFormError.textContent = err.message || 'Could not save addon.';
+                    addonFormError.classList.add('visible');
+                })
+                .finally(function () {
+                    addonFormSubmitBtn.disabled = false;
+                });
+        });
+
+        window.__showManageAddonsView = function () {
+            viewDashboard.classList.remove('active');
+            viewMenuItems.classList.remove('active');
+            viewManageAddons.classList.add('active');
+            if (bottomStatusBar) bottomStatusBar.style.display = 'none';
+
+            if (!addonsLoaded) {
+                loadBoard();
+            } else {
+                render();
+            }
+        };
+
+        window.__hideManageAddonsView = function () {
+            viewManageAddons.classList.remove('active');
+        };
+
+        function escapeHtmlLocal(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function formatMoneyLocal(amount) {
+            var num = Number(amount) || 0;
+            return '\u20B9' + num.toFixed(2).replace(/\.00$/, '');
+        }
+
+        function loadBoard() {
+            container.innerHTML = '<div class="empty-state">Loading addons...</div>';
+            fetch('/api/admin/addons/assignment-board')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Could not load addons.');
+                    return res.json();
+                })
+                .then(function (data) {
+                    addonsLoaded = true;
+                    boardCache = data;
+                    allAddonsCache = data.allAddons;
+                    render();
+                })
+                .catch(function () {
+                    container.innerHTML = '<div class="empty-state">Could not load addons. Try again.</div>';
+                });
+        }
+
+        function render() {
+            var html = '<div class="section-tabs">' +
+                '<button type="button" class="section-tab-btn' + (activeSection === 'addons' ? ' active' : '') + '" data-section="addons">Addons</button>' +
+                '<button type="button" class="section-tab-btn' + (activeSection === 'assign' ? ' active' : '') + '" data-section="assign">Assign to Items</button>' +
+                '</div>';
+
+            html += activeSection === 'addons' ? renderAddonsSection() : renderAssignSection();
+            container.innerHTML = html;
+            attachHandlers();
+        }
+
+        function renderAddonsSection() {
+            var html = '<div class="menu-admin-toolbar">' +
+                '<button type="button" class="add-item-btn" id="add-addon-btn">+ Add Addon</button>' +
+                '</div>';
+
+            if (allAddonsCache.length === 0) {
+                html += '<div class="empty-state">No addons yet. Tap "+ Add Addon" to create one.</div>';
+                return html;
+            }
+
+            allAddonsCache.forEach(function (addon) {
+                html += '<div class="addon-row" data-addon-id="' + addon.id + '">' +
+                    '<div class="addon-row-info">' +
+                    '<div class="addon-row-name">' + escapeHtmlLocal(addon.name) + '</div>' +
+                    '<div class="addon-row-price">' + formatMoneyLocal(addon.price) + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="item-edit-btn addon-edit-btn" data-addon-id="' + addon.id + '" aria-label="Edit addon">' +
+                    '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
+                    '</button>' +
+                    '<label class="switch">' +
+                    '<input type="checkbox" class="addon-active-checkbox" ' + (addon.active ? 'checked' : '') + ' />' +
+                    '<span class="switch-slider"></span>' +
+                    '</label>' +
+                    '</div>';
+            });
+
+            return html;
+        }
+
+        function renderAssignSection() {
+            if (!boardCache || !boardCache.categories || boardCache.categories.length === 0) {
+                return '<div class="empty-state">No menu items found.</div>';
+            }
+
+            var html = '';
+            boardCache.categories.forEach(function (category) {
+                if (!category.items || category.items.length === 0) return;
+                html += '<div class="menu-admin-category">';
+                html += '<h2>' + escapeHtmlLocal(category.categoryName) + '</h2>';
+
+                category.items.forEach(function (item) {
+                    html += '<div class="assign-item-row" data-item-id="' + item.menuItemId + '">';
+                    html += '<div class="assign-item-name">' + escapeHtmlLocal(item.menuItemName) + '</div>';
+                    html += '<div class="assign-addon-chips">';
+
+                    allAddonsCache.filter(function (a) { return a.active; }).forEach(function (addon) {
+                        var isAssigned = item.assignedAddonIds.indexOf(addon.id) !== -1;
+                        html += '<label class="addon-chip' + (isAssigned ? ' selected' : '') + '" data-addon-id="' + addon.id + '">' +
+                            '<input type="checkbox" ' + (isAssigned ? 'checked' : '') + ' />' +
+                            escapeHtmlLocal(addon.name) +
+                            '</label>';
+                    });
+
+                    html += '</div></div>';
+                });
+
+                html += '</div>';
+            });
+
+            return html || '<div class="empty-state">No menu items found.</div>';
+        }
+
+        function attachHandlers() {
+            var sectionTabs = container.querySelectorAll('.section-tab-btn');
+            sectionTabs.forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    activeSection = btn.getAttribute('data-section');
+                    render();
+                });
+            });
+
+            if (activeSection === 'addons') {
+                var addBtn = document.getElementById('add-addon-btn');
+                if (addBtn) {
+                    addBtn.addEventListener('click', function () { openAddonForm(null); });
+                }
+
+                container.querySelectorAll('.addon-edit-btn').forEach(function (btn) {
+                    btn.addEventListener('click', function () {
+                        var addonId = btn.getAttribute('data-addon-id');
+                        var addon = allAddonsCache.find(function (a) { return String(a.id) === addonId; });
+                        if (addon) openAddonForm(addon);
+                    });
+                });
+
+                container.querySelectorAll('.addon-active-checkbox').forEach(function (checkbox) {
+                    checkbox.addEventListener('change', function () {
+                        var row = checkbox.closest('.addon-row');
+                        var addonId = row.getAttribute('data-addon-id');
+                        var newActive = checkbox.checked;
+                        checkbox.disabled = true;
+
+                        fetch('/api/admin/addons/' + addonId + '/active?active=' + newActive, {
+                            method: 'PATCH'
+                        })
+                            .then(function (res) {
+                                if (!res.ok) throw new Error('Could not update addon.');
+                                return res.json();
+                            })
+                            .then(function (updated) {
+                                var cached = allAddonsCache.find(function (a) { return a.id === updated.id; });
+                                if (cached) cached.active = updated.active;
+                                window.showToast(updated.active ? 'Addon activated' : 'Addon deactivated');
+                            })
+                            .catch(function () {
+                                checkbox.checked = !newActive;
+                            })
+                            .finally(function () {
+                                checkbox.disabled = false;
+                            });
+                    });
+                });
+            } else {
+                container.querySelectorAll('.addon-chip').forEach(function (chip) {
+                    chip.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var row = chip.closest('.assign-item-row');
+                        var itemId = row.getAttribute('data-item-id');
+                        var addonId = Number(chip.getAttribute('data-addon-id'));
+                        var willSelect = !chip.classList.contains('selected');
+
+                        var itemEntry = null;
+                        boardCache.categories.some(function (cat) {
+                            return cat.items.some(function (it) {
+                                if (String(it.menuItemId) === itemId) {
+                                    itemEntry = it;
+                                    return true;
+                                }
+                                return false;
+                            });
+                        });
+                        if (!itemEntry) return;
+
+                        var nextIds = willSelect
+                            ? itemEntry.assignedAddonIds.concat([addonId])
+                            : itemEntry.assignedAddonIds.filter(function (id) { return id !== addonId; });
+
+                        chip.classList.toggle('selected', willSelect);
+                        chip.querySelector('input').checked = willSelect;
+
+                        fetch('/api/admin/addons/items/' + itemId, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ addonIds: nextIds })
+                        })
+                            .then(function (res) {
+                                if (!res.ok) throw new Error('Could not update assignment.');
+                                itemEntry.assignedAddonIds = nextIds;
+                                window.showToast('Addon assignment updated');
+                            })
+                            .catch(function () {
+                                chip.classList.toggle('selected', !willSelect);
+                                chip.querySelector('input').checked = !willSelect;
+                            });
+                    });
+                });
+            }
+        }
+    })();
+</script>
+<script>
+    (function () {
+        var viewDashboard = document.getElementById('view-dashboard');
+        var viewMenuItems = document.getElementById('view-menu-items');
+        var viewManageCategories = document.getElementById('view-manage-categories');
+        var container = document.getElementById('manage-categories-container');
+        var bottomStatusBar = document.getElementById('bottom-status-bar');
+
+        var categoriesLoaded = false;
+        var categoriesCache = []; // [{id, name, displayOrder, active}]
+
+        window.__showManageCategoriesView = function () {
+            viewDashboard.classList.remove('active');
+            viewMenuItems.classList.remove('active');
+            viewManageCategories.classList.add('active');
+            if (bottomStatusBar) bottomStatusBar.style.display = 'none';
+
+            loadCategories();
+        };
+
+        window.__hideManageCategoriesView = function () {
+            viewManageCategories.classList.remove('active');
+        };
+
+        function escapeHtmlLocal(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function loadCategories() {
+            container.innerHTML = '<div class="empty-state">Loading categories...</div>';
+            fetch('/api/admin/categories')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Could not load categories.');
+                    return res.json();
+                })
+                .then(function (data) {
+                    categoriesLoaded = true;
+                    categoriesCache = data;
+                    render();
+                })
+                .catch(function () {
+                    container.innerHTML = '<div class="empty-state">Could not load categories. Try again.</div>';
+                });
+        }
+
+        function render() {
+            var html = '<div class="menu-admin-toolbar">' +
+                '<button type="button" class="add-item-btn" id="add-category-btn">+ Add Category</button>' +
+                '</div>';
+
+            if (categoriesCache.length === 0) {
+                html += '<div class="empty-state">No categories yet. Tap "+ Add Category" to create one.</div>';
+                container.innerHTML = html;
+                attachHandlers();
+                return;
+            }
+
+            categoriesCache.forEach(function (category) {
+                html += '<div class="addon-row" data-category-id="' + category.id + '">' +
+                    '<div class="addon-row-info">' +
+                    '<div class="addon-row-name">' + escapeHtmlLocal(category.name) + '</div>' +
+                    '<div class="addon-row-price">Order: ' + category.displayOrder + '</div>' +
+                    '</div>' +
+                    '<button type="button" class="item-edit-btn category-edit-btn" data-category-id="' + category.id + '" aria-label="Edit category">' +
+                    '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34a.9959.9959 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>' +
+                    '</button>' +
+                    '<label class="switch">' +
+                    '<input type="checkbox" class="category-active-checkbox" ' + (category.active ? 'checked' : '') + ' />' +
+                    '<span class="switch-slider"></span>' +
+                    '</label>' +
+                    '</div>';
+            });
+
+            container.innerHTML = html;
+            attachHandlers();
+        }
+
+        function attachHandlers() {
+            var addBtn = document.getElementById('add-category-btn');
+            if (addBtn) {
+                addBtn.addEventListener('click', function () { openCategoryForm(null); });
+            }
+
+            container.querySelectorAll('.category-edit-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    var categoryId = btn.getAttribute('data-category-id');
+                    var category = categoriesCache.find(function (c) { return String(c.id) === categoryId; });
+                    if (category) openCategoryForm(category);
+                });
+            });
+
+            container.querySelectorAll('.category-active-checkbox').forEach(function (checkbox) {
+                checkbox.addEventListener('change', function () {
+                    var row = checkbox.closest('.addon-row');
+                    var categoryId = row.getAttribute('data-category-id');
+                    var newActive = checkbox.checked;
+                    checkbox.disabled = true;
+
+                    fetch('/api/admin/categories/' + categoryId + '/active?active=' + newActive, {
+                        method: 'PATCH'
+                    })
+                        .then(function (res) {
+                            if (!res.ok) throw new Error('Could not update category.');
+                            return res.json();
+                        })
+                        .then(function (updated) {
+                            var cached = categoriesCache.find(function (c) { return c.id === updated.id; });
+                            if (cached) cached.active = updated.active;
+                            window.showToast(updated.active ? 'Category activated' : 'Category deactivated');
+                        })
+                        .catch(function () {
+                            checkbox.checked = !newActive;
+                        })
+                        .finally(function () {
+                            checkbox.disabled = false;
+                        });
+                });
+            });
+        }
+
+        // --- Add / Edit category modal ---
+        var categoryFormOverlay = document.getElementById('category-form-overlay');
+        var categoryFormTitle = document.getElementById('category-form-title');
+        var categoryFormError = document.getElementById('category-form-error');
+        var categoryFormNameInput = document.getElementById('category-form-name');
+        var categoryFormOrderInput = document.getElementById('category-form-order');
+        var categoryFormSubmitBtn = document.getElementById('category-form-submit-btn');
+        var categoryFormCloseBtn = document.getElementById('category-form-close-btn');
+        var editingCategoryId = null;
+
+        function openCategoryForm(category) {
+            editingCategoryId = category ? category.id : null;
+            categoryFormTitle.textContent = category ? 'Edit Category' : 'Add Category';
+            categoryFormSubmitBtn.textContent = category ? 'Save Changes' : 'Save Category';
+            categoryFormNameInput.value = category ? category.name : '';
+            categoryFormOrderInput.value = category ? category.displayOrder : '';
+            categoryFormError.classList.remove('visible');
+            categoryFormError.textContent = '';
+            categoryFormOverlay.classList.add('visible');
+        }
+
+        function closeCategoryForm() {
+            categoryFormOverlay.classList.remove('visible');
+            editingCategoryId = null;
+        }
+
+        categoryFormCloseBtn.addEventListener('click', closeCategoryForm);
+
+        categoryFormOverlay.addEventListener('click', function (e) {
+            if (e.target === categoryFormOverlay) closeCategoryForm();
+        });
+
+        categoryFormSubmitBtn.addEventListener('click', function () {
+            var name = categoryFormNameInput.value.trim();
+            var orderRaw = categoryFormOrderInput.value.trim();
+
+            categoryFormError.classList.remove('visible');
+
+            if (!name) {
+                categoryFormError.textContent = 'Name is required.';
+                categoryFormError.classList.add('visible');
+                return;
+            }
+
+            var displayOrder = null;
+            if (orderRaw !== '') {
+                displayOrder = parseInt(orderRaw, 10);
+                if (isNaN(displayOrder) || displayOrder < 0) {
+                    categoryFormError.textContent = 'Display order must be zero or a positive number.';
+                    categoryFormError.classList.add('visible');
+                    return;
+                }
+            }
+
+            var payload = { name: name, displayOrder: displayOrder };
+
+            var url = editingCategoryId ? ('/api/admin/categories/' + editingCategoryId) : '/api/admin/categories';
+            var method = editingCategoryId ? 'PUT' : 'POST';
+
+            categoryFormSubmitBtn.disabled = true;
+
+            fetch(url, {
+                method: method,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(function (res) {
+                    if (!res.ok) return res.text().then(function (msg) { throw new Error(msg || 'Could not save category.'); });
+                    return res.json();
+                })
+                .then(function (saved) {
+                    var wasEdit = !!editingCategoryId;
+                    if (wasEdit) {
+                        var idx = categoriesCache.findIndex(function (c) { return c.id === saved.id; });
+                        if (idx !== -1) categoriesCache[idx] = saved;
+                    } else {
+                        categoriesCache.push(saved);
+                    }
+                    categoriesCache.sort(function (a, b) { return a.displayOrder - b.displayOrder; });
+                    closeCategoryForm();
+                    render();
+                    window.showToast(wasEdit ? 'Category updated' : 'Category created');
+                })
+                .catch(function (err) {
+                    categoryFormError.textContent = err.message || 'Could not save category.';
+                    categoryFormError.classList.add('visible');
+                })
+                .finally(function () {
+                    categoryFormSubmitBtn.disabled = false;
+                });
+        });
+    })();
+</script>
+</script>
+<script>
+    (function () {
+        var viewDashboard = document.getElementById('view-dashboard');
+        var viewMenuItems = document.getElementById('view-menu-items');
+        var viewManageTables = document.getElementById('view-manage-tables');
+        var container = document.getElementById('manage-tables-container');
+        var bottomStatusBar = document.getElementById('bottom-status-bar');
+
+        var tablesLoaded = false;
+        var tablesCache = []; // [{id, tableNumber, active, menuUrl}]
+
+        window.__showManageTablesView = function () {
+            viewDashboard.classList.remove('active');
+            viewMenuItems.classList.remove('active');
+            viewManageTables.classList.add('active');
+            if (bottomStatusBar) bottomStatusBar.style.display = 'none';
+            loadTables();
+        };
+
+        window.__hideManageTablesView = function () {
+            viewManageTables.classList.remove('active');
+        };
+
+        function escapeHtmlLocal(str) {
+            var div = document.createElement('div');
+            div.textContent = str || '';
+            return div.innerHTML;
+        }
+
+        function loadTables() {
+            container.innerHTML = '<div class="empty-state">Loading tables...</div>';
+            fetch('/api/admin/tables')
+                .then(function (res) {
+                    if (!res.ok) throw new Error('Could not load tables.');
+                    return res.json();
+                })
+                .then(function (data) {
+                    tablesLoaded = true;
+                    tablesCache = data;
+                    render();
+                })
+                .catch(function () {
+                    container.innerHTML = '<div class="empty-state">Could not load tables. Try again.</div>';
+                });
+        }
+
+        function render() {
+            var html = '<div class="menu-admin-toolbar">' +
+                '<button type="button" class="add-item-btn" id="add-table-btn">+ Add Table</button>' +
+                '<a class="add-item-btn" id="download-all-qr-link" href="/api/admin/tables/qr/all" style="text-decoration:none;display:inline-block;margin-left:8px;">Download All QR Codes</a>' +
+                '</div>';
+
+            if (tablesCache.length === 0) {
+                html += '<div class="empty-state">No tables yet. Tap "+ Add Table" to create one.</div>';
+                container.innerHTML = html;
+                attachHandlers();
+                return;
+            }
+
+            tablesCache.forEach(function (table) {
+                var qrSrc = '/api/admin/tables/' + encodeURIComponent(table.tableNumber) + '/qr';
+
+                html += '<div class="addon-row" data-table-number="' + escapeHtmlLocal(table.tableNumber) + '" style="align-items:center;">' +
+                    '<img src="' + qrSrc + '" alt="QR for table ' + escapeHtmlLocal(table.tableNumber) + '" ' +
+                    'style="height:88px;width:auto;object-fit:contain;flex-shrink:0;border-radius:8px;border:1px solid rgba(0,0,0,0.12);margin-right:14px;background:#fff;padding:4px;box-shadow:0 1px 4px rgba(59,20,16,0.12);" />' +
+                    '<div class="addon-row-info">' +
+                    '<div class="addon-row-name">Table ' + escapeHtmlLocal(table.tableNumber) + '</div>' +
+                    '<div class="addon-row-price">' + (table.active ? 'Active' : 'Inactive') + '</div>' +
+                    '</div>' +
+                    '<a class="item-edit-btn table-download-btn" href="' + qrSrc + '" download="table-' + escapeHtmlLocal(table.tableNumber) + '-qr.png" aria-label="Download QR code" title="Download QR code">' +
+                    '<svg viewBox="0 0 24 24"><path d="M5 20h14v-2H5v2zM19 9h-4V3H9v6H5l7 7 7-7z"/></svg>' +
+                    '</a>' +
+                    '</div>';
+            });
+
+            container.innerHTML = html;
+            attachHandlers();
+        }
+
+        function attachHandlers() {
+            var addBtn = document.getElementById('add-table-btn');
+            if (addBtn) addBtn.addEventListener('click', openTableForm);
+        }
+
+        var tableFormOverlay = document.getElementById('table-form-overlay');
+        var tableFormError = document.getElementById('table-form-error');
+        var tableFormNumberInput = document.getElementById('table-form-number');
+        var tableFormSubmitBtn = document.getElementById('table-form-submit-btn');
+        var tableFormCloseBtn = document.getElementById('table-form-close-btn');
+
+        function openTableForm() {
+            tableFormNumberInput.value = '';
+            tableFormError.classList.remove('visible');
+            tableFormError.textContent = '';
+            tableFormOverlay.classList.add('visible');
+        }
+
+        function closeTableForm() {
+            tableFormOverlay.classList.remove('visible');
+        }
+
+        tableFormCloseBtn.addEventListener('click', closeTableForm);
+
+        tableFormOverlay.addEventListener('click', function (e) {
+            if (e.target === tableFormOverlay) closeTableForm();
+        });
+
+        tableFormSubmitBtn.addEventListener('click', function () {
+            var tableNumber = tableFormNumberInput.value.trim();
+            tableFormError.classList.remove('visible');
+
+            if (!tableNumber) {
+                tableFormError.textContent = 'Table number is required.';
+                tableFormError.classList.add('visible');
+                return;
+            }
+
+            var alreadyExists = tablesCache.some(function (t) {
+                return t.tableNumber.toLowerCase() === tableNumber.toLowerCase();
+            });
+            if (alreadyExists) {
+                tableFormError.textContent = 'A table with this number already exists.';
+                tableFormError.classList.add('visible');
+                return;
+            }
+
+            tableFormSubmitBtn.disabled = true;
+
+            fetch('/api/admin/tables', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tableNumber: tableNumber })
+            })
+                .then(function (res) {
+                    if (!res.ok) return res.text().then(function (msg) { throw new Error(msg || 'Could not save table.'); });
+                    return res.json();
+                })
+                .then(function (saved) {
+                    tablesCache.push(saved);
+                    closeTableForm();
+                    render();
+                    window.showToast('Table created — QR code is ready below');
+                })
+                .catch(function (err) {
+                    tableFormError.textContent = err.message || 'Could not save table.';
+                    tableFormError.classList.add('visible');
+                })
+                .finally(function () {
+                    tableFormSubmitBtn.disabled = false;
+                });
+        });
+    })();
+</script>
+</body>
+</html>

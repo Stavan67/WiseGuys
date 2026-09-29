@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseGuy's Cafe - Session Ended</title>
+    <style>
+        :root {
+            --maroon: #3B1410;
+            --maroon-dark: #2A0D0A;
+            --gold: #C9A96A;
+            --gold-light: #F0DBA6;
+            --cream: #EDE7DA;
+            --cream-warm: #F5F1E8;
+            --ink: #2A1F1A;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            color: var(--ink);
+        }
+
+        .center-wrap {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background:
+                    radial-gradient(circle at 18% 12%, rgba(59,20,16,0.05), transparent 45%),
+                    radial-gradient(circle at 85% 88%, rgba(201,169,106,0.10), transparent 50%),
+                    var(--cream-warm);
+            padding: 24px;
+        }
+
+        .card {
+            max-width: 420px;
+            width: 100%;
+            text-align: center;
+            background: #fff;
+            border: 1px solid rgba(59, 20, 16, 0.12);
+            border-radius: 16px;
+            padding: 32px 32px 36px;
+            box-shadow: 0 16px 40px rgba(59, 20, 16, 0.12);
+        }
+
+        .hat-icon {
+            width: 124px;
+            height: 72px;
+            margin: 0 auto 20px;
+            display: block;
+            overflow: visible;
+        }
+
+        .hat-body {
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+            animation: hatFloat 4s ease-in-out infinite;
+        }
+
+        .hat-shadow {
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: shadowPulse 4s ease-in-out infinite;
+        }
+
+        @keyframes hatFloat {
+            0%, 100% { transform: translateY(0)    rotate(0deg); }
+            50%      { transform: translateY(-3px) rotate(-1.5deg); }
+        }
+
+        @keyframes shadowPulse {
+            0%, 100% { transform: scaleX(1);    opacity: 1; }
+            50%      { transform: scaleX(0.88); opacity: 0.7; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .hat-body, .hat-shadow { animation: none; }
+        }
+
+        h1 {
+            margin: 8px 0 10px;
+            color: var(--maroon);
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        .rule {
+            width: 36px;
+            height: 2px;
+            margin: 16px auto 18px;
+            background: var(--gold);
+            border: none;
+        }
+
+        p.message {
+            margin: 0;
+            font-size: 15.5px;
+            line-height: 1.6;
+            color: var(--ink);
+        }
+
+        .footnote {
+            margin: 22px 0 0;
+            padding-top: 18px;
+            border-top: 1px solid rgba(59, 20, 16, 0.1);
+            font-size: 12.5px;
+            letter-spacing: 0.3px;
+            color: rgba(42, 31, 26, 0.55);
+        }
+    </style>
+</head>
+<body>
+<div class="center-wrap">
+    <div class="card">
+        <svg class="hat-icon" viewBox="0 0 120 72" aria-hidden="true">
+            <defs>
+                <linearGradient id="crownGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%"   stop-color="#4A1E18"/>
+                    <stop offset="45%"  stop-color="#63302A"/>
+                    <stop offset="100%" stop-color="#2A0D0A"/>
+                </linearGradient>
+                <linearGradient id="brimGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"   stop-color="#5A2A22"/>
+                    <stop offset="100%" stop-color="#3B1410"/>
+                </linearGradient>
+                <linearGradient id="bandGrad" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%"   stop-color="#B8964F"/>
+                    <stop offset="50%"  stop-color="#F0DBA6"/>
+                    <stop offset="100%" stop-color="#C9A96A"/>
+                </linearGradient>
+            </defs>
+
+            <!-- ground shadow -->
+            <ellipse class="hat-shadow" cx="60" cy="67" rx="36" ry="3.2" fill="rgba(59,20,16,0.16)"/>
+
+            <g class="hat-body">
+                <!-- brim -->
+                <path d="M8,48 C8,43 30,41 60,41 C90,41 112,43 112,48 C112,57 88,62 60,62 C32,62 8,57 8,48 Z"
+                      fill="url(#brimGrad)"/>
+                <path d="M9.5,50 C13,57 38,61 60,61 C82,61 107,57 110.5,50"
+                      fill="none" stroke="rgba(240,219,166,0.45)" stroke-width="1" stroke-linecap="round"/>
+
+                <!-- crown (with centre dent) -->
+                <path d="M31,44 C29,26 37,11 50,8 C55,7 58,11 60,11 C62,11 65,7 70,8 C83,11 91,26 89,44
+                 Q60,52 31,44 Z"
+                      fill="url(#crownGrad)"/>
+                <path d="M60,11 C58.5,22 59,33 60,47" fill="none"
+                      stroke="rgba(0,0,0,0.28)" stroke-width="1.4" stroke-linecap="round"/>
+                <path d="M40,36 C38.5,26 42,17 49,12" fill="none"
+                      stroke="rgba(240,219,166,0.35)" stroke-width="1.6" stroke-linecap="round"/>
+
+                <!-- hatband -->
+                <path d="M30.4,36 Q60,43 89.6,36 L89,44 Q60,52 31,44 Z" fill="url(#bandGrad)"/>
+                <path d="M76,39.5 L82.5,38.5 L82.5,47 L76,48 Z" fill="#2A0D0A" opacity="0.85"/>
+            </g>
+        </svg>
+        <h1>Session Ended</h1>
+        <hr class="rule">
+        <p class="message" th:text="${message}">Please scan the table's QR code again to start a new order.</p>
+        <p class="footnote">WiseGuy's</p>
+    </div>
+</div>
+</body>
+</html>

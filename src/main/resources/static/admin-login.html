@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WiseGuy's - Admin Login</title>
+    <style>
+        :root {
+            --maroon: #3B1410;
+            --maroon-dark: #2A0D0A;
+            --cream: #EDE7DA;
+            --gold: #C9A96A;
+            --text-dark: #2A1F1A;
+            --red: #c62828;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: var(--maroon);
+            color: var(--text-dark);
+            padding: 20px;
+            position: relative;
+        }
+
+        .page-logo {
+            display: block;
+            margin: -60px auto 20px;
+            max-width: 340px;
+            max-height: 200px;
+            width: auto;
+            height: auto;
+        }
+
+        .login-card {
+            background: var(--cream);
+            border-radius: 16px;
+            padding: 32px 28px;
+            width: 100%;
+            max-width: 360px;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.35);
+            text-align: center;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--maroon);
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+
+        .form-group {
+            text-align: left;
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: bold;
+            color: var(--maroon);
+            margin-bottom: 5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1.5px solid rgba(59, 20, 16, 0.3);
+            border-radius: 8px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--maroon);
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 44px;
+        }
+
+        .toggle-password {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--maroon);
+            cursor: pointer;
+            font-family: inherit;
+            padding: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toggle-password svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        .toggle-password .icon-eye-off {
+            display: none;
+        }
+
+        .toggle-password.showing .icon-eye {
+            display: none;
+        }
+
+        .toggle-password.showing .icon-eye-off {
+            display: block;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: var(--maroon);
+            color: var(--cream);
+            border: none;
+            padding: 13px;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            margin-top: 6px;
+            font-family: inherit;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Base state: hidden. JS adds .error/.info AND .visible only when the
+           matching URL param is actually present, so nothing shows by default. */
+        .message {
+            display: none;
+            font-size: 13px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+
+        .message.visible {
+            display: block;
+        }
+
+        .message.error {
+            background: #ffe0e0;
+            color: var(--red);
+        }
+
+        .message.info {
+            background: #e3f2e3;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+<img src="/images/logo.png" alt="WiseGuy's" class="page-logo" />
+<div class="login-card">
+    <div class="login-subtitle">Admin Login</div>
+
+    <div class="message" id="error-msg">Incorrect username or password. Please try again.</div>
+    <div class="message" id="logout-msg">You've been logged out.</div>
+
+    <form action="/login" method="POST">
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" autocomplete="username" required autofocus />
+        </div>
+        <div class="form-group">
+            <label for="password">Password</label>
+            <div class="password-wrapper">
+                <input type="password" id="password" name="password" autocomplete="current-password" required />
+                <button type="button" class="toggle-password" id="toggle-password" aria-label="Show password">
+                    <svg class="icon-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/>
+                        <circle cx="12" cy="12" r="3"/>
+                    </svg>
+                    <svg class="icon-eye-off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a21.62 21.62 0 0 1 5.06-6.06M9.9 4.24A10.4 10.4 0 0 1 12 4c7 0 11 8 11 8a21.6 21.6 0 0 1-3.22 4.53M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
+                        <line x1="1" y1="1" x2="23" y2="23"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <button type="submit" class="login-btn">Log In</button>
+    </form>
+</div>
+
+<script>
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('error') === 'true') {
+        document.getElementById('error-msg').classList.add('error', 'visible');
+    }
+    if (params.get('logout') === 'true') {
+        document.getElementById('logout-msg').classList.add('info', 'visible');
+    }
+
+    document.getElementById('toggle-password').addEventListener('click', function () {
+        var pwd = document.getElementById('password');
+        var btn = this;
+        if (pwd.type === 'password') {
+            pwd.type = 'text';
+            btn.classList.add('showing');
+            btn.setAttribute('aria-label', 'Hide password');
+        } else {
+            pwd.type = 'password';
+            btn.classList.remove('showing');
+            btn.setAttribute('aria-label', 'Show password');
+        }
+    });
+</script>
+
+</body>
+</html>
