@@ -75,31 +75,27 @@ public class QrCodeServiceImpl implements QrCodeService {
     private static final int CARD_W = 1240;
     private static final int CARD_H = 1748;
 
+    // Theme colours (same as the website / admin)
     private static final Color MAROON = new Color(0x3B, 0x14, 0x10);
     private static final Color MAROON_DARK = new Color(0x2A, 0x0D, 0x0A);
     private static final Color CREAM = new Color(0xED, 0xE7, 0xDA);
     private static final Color GOLD = new Color(0xC9, 0xA9, 0x6A);
-
     private static final Color HEADER_BG = MAROON;
     private static final int HEADER_H = 400;
     private static final int LOGO_MAX_W = 980;
     private static final int LOGO_MAX_H = 280;
     private static final String LOGO_RESOURCE = "/static/images/logo.png";
-
-    // Optional: drop a .ttf here and it is used for ALL card text (recommended on Linux servers).
     private static final String FONT_RESOURCE = "/static/fonts/card-font.ttf";
 
-    private static final String HEADING = "Scan this QR code to order";
+    private static final String HEADING = "Scan the QR menu to order";
     private static final String FOOTER = "wiseguys";
-
-    // One font family, three sizes
     private static final int HEADING_SIZE = 62;
     private static final int TABLE_SIZE = 54;
     private static final int FOOTER_SIZE = 38;
 
     private static final int QR_SIZE = 720;
     private static final int PANEL_PAD = 70;           // white quiet zone around the QR
-    private static final int PANEL_TOP = 550;
+    private static final int PANEL_TOP = 610;           // pushed down to leave a clear gap below the logo header
 
     private volatile BufferedImage logo;
     private volatile boolean logoLoaded;
@@ -144,7 +140,7 @@ public class QrCodeServiceImpl implements QrCodeService {
 
             // Table name in a plain maroon pill (no outline)
             int pillH = 104;
-            int pillTop = PANEL_TOP + panelSize + 56;
+            int pillTop = PANEL_TOP + panelSize + 50;
             g.setFont(fitFont(700, TABLE_SIZE, 32, g, tableLabel, Font.BOLD));
             FontMetrics fm = g.getFontMetrics();
             int pillW = Math.min(CARD_W - 240, fm.stringWidth(tableLabel) + 140);
