@@ -20,9 +20,9 @@ import javax.imageio.ImageWriter;
 import javax.imageio.metadata.IIOMetadata;
 import javax.imageio.metadata.IIOMetadataNode;
 import javax.imageio.stream.ImageOutputStream;
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontFormatException;
 import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Graphics2D;
@@ -36,7 +36,9 @@ import java.io.InputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class QrCodeServiceImpl implements QrCodeService {
@@ -44,21 +46,11 @@ public class QrCodeServiceImpl implements QrCodeService {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    // ---------------------------------------------------------------------
-    // Public API
-    // ---------------------------------------------------------------------
-
-    /** Plain QR with no label (kept so existing callers don't break). */
     @Override
     public byte[] generateQrPng(String qrCodeValue, int size) {
         return generateQrPng(qrCodeValue, null, size);
     }
 
-    /**
-     * With a label (e.g. "Table 5") this returns the full A6 table card:
-     * logo, "Scan this QR code to order", the QR code, and the table name.
-     * The card has a fixed A6 size at 300 DPI, so {@code size} is only used for the plain QR.
-     */
     @Override
     public byte[] generateQrPng(String qrCodeValue, String label, int size) {
         String content = resolveMenuUrl(qrCodeValue);
@@ -79,32 +71,35 @@ public class QrCodeServiceImpl implements QrCodeService {
         return baseUrl + "/menu?table=" + URLEncoder.encode(qrCodeValue, StandardCharsets.UTF_8);
     }
 
-    // ---------------------------------------------------------------------
-    // Card design (all sizes in pixels at 300 DPI; A6 = 105 x 148 mm)
-    // ---------------------------------------------------------------------
-
     private static final int DPI = 300;
     private static final int CARD_W = 1240;
     private static final int CARD_H = 1748;
 
-    // Theme colours (same as the website / admin)
     private static final Color MAROON = new Color(0x3B, 0x14, 0x10);
     private static final Color MAROON_DARK = new Color(0x2A, 0x0D, 0x0A);
     private static final Color CREAM = new Color(0xED, 0xE7, 0xDA);
     private static final Color GOLD = new Color(0xC9, 0xA9, 0x6A);
 
-    // Header band that holds the logo. Change to CREAM if your logo is dark on a light background.
     private static final Color HEADER_BG = MAROON;
-    private static final int HEADER_H = 360;
-    private static final int LOGO_MAX_W = 780;
-    private static final int LOGO_MAX_H = 220;
+    private static final int HEADER_H = 400;
+    private static final int LOGO_MAX_W = 980;
+    private static final int LOGO_MAX_H = 280;
     private static final String LOGO_RESOURCE = "/static/images/logo.png";
 
-    private static final String HEADING = "Scan this QR code to order";
+    // Optional: drop a .ttf here and it is used for ALL card text (recommended on Linux servers).
+    private static final String FONT_RESOURCE = "/static/fonts/card-font.ttf";
 
-    private static final int QR_SIZE = 740;
-    private static final int PANEL_PAD = 80;           // white quiet zone around the QR
-    private static final int PANEL_TOP = 520;
+    private static final String HEADING = "Scan this QR code to order";
+    private static final String FOOTER = "wiseguys";
+
+    // One font family, three sizes
+    private static final int HEADING_SIZE = 62;
+    private static final int TABLE_SIZE = 54;
+    private static final int FOOTER_SIZE = 38;
+
+    private static final int QR_SIZE = 720;
+    private static final int PANEL_PAD = 70;           // white quiet zone around the QR
+    private static final int PANEL_TOP = 550;
 
     private volatile BufferedImage logo;
     private volatile boolean logoLoaded;
@@ -134,12 +129,11 @@ public class QrCodeServiceImpl implements QrCodeService {
             g.fillRect(0, HEADER_H, CARD_W, 10);
 
             // Heading
-            Font headingFont = fitFont(1000, 76, 40, g, HEADING, Font.BOLD);
-            g.setFont(headingFont);
+            g.setFont(fitFont(1040, HEADING_SIZE, 36, g, HEADING, Font.BOLD));
             g.setColor(MAROON);
             drawCentered(g, HEADING, CARD_W / 2, HEADER_H + 10, PANEL_TOP - (HEADER_H + 10));
 
-            // White panel with gold border, then the QR on top
+            // White panel with gold border (the only gold border on the card), then the QR on top
             int panelSize = QR_SIZE + 2 * PANEL_PAD;
             int panelX = (CARD_W - panelSize) / 2;
             g.setColor(GOLD);
@@ -148,36 +142,23 @@ public class QrCodeServiceImpl implements QrCodeService {
             g.fill(new RoundRectangle2D.Float(panelX, PANEL_TOP, panelSize, panelSize, 48, 48));
             g.drawImage(qr, panelX + PANEL_PAD, PANEL_TOP + PANEL_PAD, null);
 
-            // Table name in a maroon pill
-            int pillH = 130;
-            int pillTop = PANEL_TOP + panelSize + 50;
-            Font tableFont = fitFont(800, 96, 40, g, tableLabel, Font.BOLD);
-            g.setFont(tableFont);
+            // Table name in a plain maroon pill (no outline)
+            int pillH = 104;
+            int pillTop = PANEL_TOP + panelSize + 56;
+            g.setFont(fitFont(700, TABLE_SIZE, 32, g, tableLabel, Font.BOLD));
             FontMetrics fm = g.getFontMetrics();
-            int pillW = Math.min(CARD_W - 160, fm.stringWidth(tableLabel) + 160);
+            int pillW = Math.min(CARD_W - 240, fm.stringWidth(tableLabel) + 140);
             int pillX = (CARD_W - pillW) / 2;
             g.setColor(MAROON);
             g.fill(new RoundRectangle2D.Float(pillX, pillTop, pillW, pillH, pillH, pillH));
-            g.setColor(GOLD);
-            g.setStroke(new BasicStroke(5f));
-            g.draw(new RoundRectangle2D.Float(pillX + 2.5f, pillTop + 2.5f, pillW - 5, pillH - 5, pillH - 5, pillH - 5));
             g.setColor(CREAM);
             drawCentered(g, tableLabel, CARD_W / 2, pillTop, pillH);
 
-            // Small website line at the bottom
-            String site = siteLabel();
-            if (!site.isEmpty()) {
-                Font siteFont = baseFont().deriveFont(Font.PLAIN, 40f);
-                g.setFont(siteFont);
-                g.setColor(new Color(MAROON.getRed(), MAROON.getGreen(), MAROON.getBlue(), 190));
-                int zoneTop = pillTop + pillH;
-                drawCentered(g, site, CARD_W / 2, zoneTop, CARD_H - 30 - zoneTop);
-            }
-
-            // Thin gold frame around the whole card
-            g.setColor(GOLD);
-            g.setStroke(new BasicStroke(5f));
-            g.draw(new RoundRectangle2D.Float(28, 28, CARD_W - 56, CARD_H - 56, 40, 40));
+            // Small footer text, centred in the space below the pill
+            g.setFont(baseFont().deriveFont(Font.PLAIN, (float) FOOTER_SIZE));
+            g.setColor(new Color(MAROON.getRed(), MAROON.getGreen(), MAROON.getBlue(), 200));
+            int zoneTop = pillTop + pillH;
+            drawCentered(g, FOOTER, CARD_W / 2, zoneTop, CARD_H - zoneTop);
         } finally {
             g.dispose();
         }
@@ -188,8 +169,7 @@ public class QrCodeServiceImpl implements QrCodeService {
         BufferedImage img = loadLogo();
         if (img == null) {
             // No logo file found: fall back to the name in text
-            Font f = fitFont(LOGO_MAX_W, 120, 40, g, "WiseGuy's", Font.BOLD);
-            g.setFont(f);
+            g.setFont(fitFont(LOGO_MAX_W, 130, 40, g, "WiseGuy's", Font.BOLD));
             g.setColor(GOLD);
             drawCentered(g, "WiseGuy's", CARD_W / 2, 0, HEADER_H);
             return;
@@ -229,7 +209,8 @@ public class QrCodeServiceImpl implements QrCodeService {
                 if (!logoLoaded) {
                     try (InputStream in = QrCodeServiceImpl.class.getResourceAsStream(LOGO_RESOURCE)) {
                         if (in != null) {
-                            logo = ImageIO.read(in);
+                            BufferedImage raw = ImageIO.read(in);
+                            logo = raw == null ? null : trimEmptyEdges(raw);
                         }
                     } catch (IOException ignored) {
                         // fall back to text
@@ -241,9 +222,40 @@ public class QrCodeServiceImpl implements QrCodeService {
         return logo;
     }
 
-    private String siteLabel() {
-        if (baseUrl == null) return "";
-        return baseUrl.replaceFirst("^https?://", "").replaceAll("/+$", "");
+    /**
+     * Crops transparent (or flat background-coloured) margins around the logo.
+     * Empty padding inside the PNG is what makes a logo look small and off-centre.
+     */
+    private static BufferedImage trimEmptyEdges(BufferedImage src) {
+        int w = src.getWidth();
+        int h = src.getHeight();
+        int ref = src.getRGB(0, 0);
+        boolean refOpaque = (ref >>> 24) > 200;
+
+        int minX = w, minY = h, maxX = -1, maxY = -1;
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                if (isContent(src.getRGB(x, y), ref, refOpaque)) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+        }
+        if (maxX < minX || maxY < minY) {
+            return src; // nothing found, keep as is
+        }
+        return src.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
+    }
+
+    private static boolean isContent(int argb, int ref, boolean refOpaque) {
+        if ((argb >>> 24) < 20) return false;
+        if (!refOpaque) return true;
+        int dr = Math.abs(((argb >> 16) & 0xFF) - ((ref >> 16) & 0xFF));
+        int dg = Math.abs(((argb >> 8) & 0xFF) - ((ref >> 8) & 0xFF));
+        int db = Math.abs((argb & 0xFF) - (ref & 0xFF));
+        return dr > 24 || dg > 24 || db > 24;
     }
 
     // ---------------------------------------------------------------------
@@ -260,14 +272,37 @@ public class QrCodeServiceImpl implements QrCodeService {
         return MatrixToImageWriter.toBufferedImage(matrix, new MatrixToImageConfig(onColor, offColor));
     }
 
-    /** Georgia to match the site; falls back to the JVM's generic serif font if not installed. */
-    private static Font baseFont() {
-        for (String name : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
-            if (name.equalsIgnoreCase("Georgia")) {
-                return new Font("Georgia", Font.PLAIN, 1);
+    /** Resolved once; every piece of text on the card uses this same family. */
+    private static final class CardFont {
+        static final Font BASE = load();
+
+        private static Font load() {
+            // 1) A bundled font file wins, so the card looks identical on every server
+            try (InputStream in = QrCodeServiceImpl.class.getResourceAsStream(FONT_RESOURCE)) {
+                if (in != null) {
+                    return Font.createFont(Font.TRUETYPE_FONT, in).deriveFont(Font.PLAIN, 1f);
+                }
+            } catch (IOException | FontFormatException ignored) {
+                // fall through to installed fonts
             }
+            // 2) First installed font from the preferred list
+            Set<String> installed = new HashSet<>();
+            for (String name : GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames()) {
+                installed.add(name.toLowerCase());
+            }
+            String[] preferred = {"Georgia", "Playfair Display", "Cambria", "Times New Roman", "DejaVu Serif", "Liberation Serif"};
+            for (String name : preferred) {
+                if (installed.contains(name.toLowerCase())) {
+                    return new Font(name, Font.PLAIN, 1);
+                }
+            }
+            // 3) Generic serif
+            return new Font(Font.SERIF, Font.PLAIN, 1);
         }
-        return new Font(Font.SERIF, Font.PLAIN, 1);
+    }
+
+    private static Font baseFont() {
+        return CardFont.BASE;
     }
 
     /** Largest font (up to startSize) whose text fits in maxWidth. */
